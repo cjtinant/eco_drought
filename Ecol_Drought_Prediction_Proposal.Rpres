@@ -1,0 +1,219 @@
+Ecological drought prediction and mitigation
+========================================================
+author: C. Jason Tinant
+date: April 11, 2018
+autosize: true
+
+
+Introduction
+========================================================
+
+- Aquatic communities rely on streamflow
+- Streamflow varies in time (e.g. floods, droughts) 
+- Streamflow varies in space (geology, flow abstractions)
+
+**Challenge:** "We understand how freshwater communities persist during normal and high flows better than we understand the ecological effects of droughts" - P.S. Lake
+
+Biotic integrity has a signal to noise problem
+========================================================
+- We lack numeric approaches for ecosystem response to drought 
+- Biotic integrity metrics **should** detect land use changes resulting in decreased habitat quality 
+- However, drought affects also community composition:
++ *Predictible* seasonal drought -> **community resistance & 
+resilience** 
++ *Unpredictable* supra-seasonal drought -> **regime shift**
+
+Hypothesis & Project Design
+========================================================
+ 
+**Drought is a key driver of macroinvertebrate 
+community regime shift for Northern Great Plains 
+streams.** 
+
+To validate and design solution, I plan to:
+
+1. Quantify drought magnitudes for streams
+2. Test effect of drought on invertebrate regime shift
+3. Develop IBI metrics with robust invertebrates  
+4. Update OST watershed protection plan with updated IBI metrics
+
+
+How to define drought?
+========================================================
+
+- Drought is a persistent deficit in precipitation or 
+water supply measured across space and time
+
+Two general drought classes:
+
+- **Operational drought**: Moisture deficit in one or more 
+hydrologic cycle components. *Robust indices available*
+
+- **Conceptual drought**: water supply deficits for 
+society or ecosystems. *Objective measurements lacking*
+
+
+Drought-type Hierarchy
+========================================================
+- **Meteorological drought**: Deficit between actual &
+expected precipitation.  Leads to other drought types
+
+-  **Agricultural drought**: Inadequate soil moisture 
+to meet evapotranspiration & vegetation demands
+
+- **Hydrological drought**:  Surface & ground water 
+deficit lagging precipitation deficit & recovery 
+
+- **Ecological drought** water shortage causing 
+ecosystem stress & adversely to plants and animals by
+flow reduction, higher water temps & salinity 
+
+
+Drought Index Recomendations
+========================================================
+
+WMO recommends a drought index approach:
+
+- **Standardized Precipitation Index (SPI)** for   
+meteorological drought
+ 
+-  **Standardized Precipitation Evapotranspiration Index (SPEI)**
+for soil moisture drought
+
+- **Streamflow drought index (SDI)** discussed for 
+hydrological drought  
+
+- **No WMO recommendations** for ecological drought.
+
+
+General Description of Study Area
+========================================================
+- Northern Great Plains - Pine Ridge Reservation
+- Climate: semi-arid mid-latitude cold steppe climate (BSk) 
+- Elevation: 2,250 - to 3,700 ft (xxx m)
+- Precipitation: 15.8 to 17.2 inches (xxx m)
+- Mixed-grass prairie with Ponderosa savanna on N. slopes
+- Cattle ranching with minor grass & row crops (N-SE)
+
+Study Area Ecoregions
+========================================================
+
+- Nebraska Sand Hills: Stabilized sand dunes ($Q_{SH}$)
+SW-groundwater interface - constant base flow
+- Keya Paha Tablelands: Soft sandstone plains ($T_A$)
+Riparian Ash-Elm forest overstory
+- Pine Ridge Escarpment: Sandstone ridges ($T_A$)
+Ponderosa Pine & Ash-Elm forest overstory
+- White River Badlands: Escarpments ($T_{WR}$)
+Cottonwood-willow woodlands over turbid ephemeral streams 
+
+Study Area Streams
+========================================================
+- Low gradient dune-ripple morphology streams 
+with well-developed floodplains.   
+- Nebraska Sand Hills - Little White River:
+Eastward flowing, baseflow dominated E5 stream type 
+- Keya Paha Tablelands & Keya Paha Tablelands: North flowing 
+mixed-flow, low turbidity C6 or E6 stream-types 
+- White River Badlands: North flowing event-dominated, high turbidity 
+from constant stream channel adjustment between C6 – G6 – F6 – E6 morphologies. 
+
+Materials and Methods
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Q1: What are the relationships between drought types
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Q2: What are abiotic drivers of regime shift?
+========================================================
+
+```{r}
+summary(cars)
+```
+
+Q3: Which taxa groups are drought-resilient & indicate WQ
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Expected Results
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Work Plan/Timetable
+========================================================
+
+```{r}
+summary(cars)
+```
+
+
+Map of Study Area
+========================================================
+```{r library, include=FALSE, eval=FALSE}
+# library("maps")
+# library("mapdata") # need to install
+library("ggmap")
+library("ggplot2")
+```
+```{r state_map, echo=FALSE}
+# map of south dakota and nebraska----
+
+# subset region using data from the 'maps' package
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sd_neb <- map_data("state")
+sd_neb <- subset(sd_neb_wyo, region %in% 
+   c("south dakota", "nebraska"))
+
+counties <- map_data("county") 
+counties <- subset(counties, region %in% 
+   c("south dakota", "nebraska"))
+prr <- subset(counties, subregion %in% 
+   c("shannon", "jackson", "bennett"))
+
+ggplot() + 
+  geom_polygon(data = counties, 
+              aes(x = long, y = lat, group = group), 
+              color = "gray", fill = NA) +
+  geom_polygon(data = sd_neb, 
+              aes(x = long, y = lat, group = group), 
+              color = "black", fill = NA) +  
+  geom_polygon(data = prr, 
+              aes(x = long, y = lat, group = group), 
+              color = "black", fill = "red") +
+  coord_fixed(1.3) +
+  ggtitle("Study Area", subtitle = "Pine Ridge Reservation") +
+  xlab("") +
+  ylab("") +
+  theme_minimal()
+```
+
+
+
+Overview
+========================================================
+
+- Challenge 2: increased water demands and land use
+- Challenge 2: increased water demands and land use
+- Challenge 2: increased water demands and land use
+
+"We understand how freshwater communities persist during normal and high flows better than we understand the ecological effects of droughts" - P.S. Lake
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
