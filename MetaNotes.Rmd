@@ -18,20 +18,14 @@ knitr::opts_chunk$set(echo = TRUE)
 # Purpose
 This worksheet contains meta-analytical ideas and resources to improve the efficiency of dissertation writing.
 
-## Reproducible Research
-[archivist](https://raw.githubusercontent.com/pbiecek/archivist/master/cheatsheets/archivistCheatsheet.png)
-
-Also check out packrat
-
-
-## Plotting
-(patchwork)[https://github.com/thomasp85/patchwork/tree/master/R]
+# Next Steps
+* Finish reading project structure
+* check out 'roxygen2', 'packrat'
 
 
 
-
-## Project structure
-Outlines project as package by 'Efficient R Programming'----
+# Project structure
+This outlines project as package by 'Efficient R Programming'----
 
 Improve project management and workflow by treating projects as R packages. An intermediate approach is to use a ‘dummy package’ that includes a DESCRIPTION file in the root directory to tell which packages must be installed for the code to work.  Example is 'Efficient R Programming' based on a dummy package so that they can easily keep dependencies up-to-date (see DESCRIPTION file)
 
@@ -39,8 +33,7 @@ Creating packages teaches correct code documentation, storage of example data, a
 
 The DESCRIPTION file contains key information about the package, including which packages are required for the code contained in your package to work, e.g. using Imports:. This is efficient because it means that anyone who installs your package will automatically install the other packages that it depends on.
 
-The R/ folder contains all the R code that defines package functions. Placing code in a single place and keeping code modular can greatly reduce code duplication. Furthermore, *documentation of R packages through Roxygen tags such as: 'This function does this...' makes it easy for others to use your work.* This form of efficient documentation is facilitated by the
-**roxygen2** package.
+The R/ folder contains all the R code that defines package functions. Placing code in a single place and keeping code modular can greatly reduce code duplication. Furthermore, *documentation of R packages through Roxygen tags such as: 'This function does this...' makes it easy for others to use your work.* This form of efficient documentation is facilitated by the **roxygen2** package.
 
 # The data/ folder contains example code for demonstrating to others
 # how the functions work and transporting datasets that will be
@@ -58,7 +51,7 @@ The R/ folder contains all the R code that defines package functions. Placing co
 
 # thoughts-on-thesisdown
 1. look into making a vingette for thesisdown  
-```
+
 ```{r library}
 # To set up the thesis
 library("here") # sets up a home for your work
@@ -222,6 +215,16 @@ mermaid("gantt
 ```{r import-data}
 # use RIO or dataRetreval----
 ```
+
+# Packages and Tutorials
+## Reproducible Research
+[archivist](https://raw.githubusercontent.com/pbiecek/archivist/master/cheatsheets/archivistCheatsheet.png)
+
+# Plotting
+[patchwork](https://github.com/thomasp85/patchwork/tree/master/R])
+
+# Analysis
+[Decision Trees tutorial](https://github.com/GeostatsGuy/geostatsr) 
 
 ```{r tidy-data}
 # Tidyr and dplyr example using the fivethirtyeight package ----
