@@ -1,7 +1,7 @@
 Ecological drought prediction and mitigation
 ========================================================
 author: C. Jason Tinant
-date: April 11, 2018
+date: April 25, 2018
 autosize: true
 
 
@@ -10,18 +10,27 @@ Introduction
 
 - Aquatic communities rely on streamflow
 - Streamflow varies in time (e.g. floods, droughts) 
-- Streamflow varies in space (geology, flow abstractions)
+- Streamflow varies in space (climate, geology, 
+flow abstractions)
 
-**Challenge:** "We understand how freshwater communities persist during normal and high flows better than we understand the ecological effects of droughts" - P.S. Lake
+**Challenge:** "We understand how freshwater 
+communities persist during normal and high flows 
+better than we understand the ecological effects of 
+droughts" - P.S. Lake
+
 
 Biotic integrity has a signal to noise problem
 ========================================================
-- We lack numeric approaches for ecosystem response to drought 
-- Biotic integrity metrics **should** detect land use changes resulting in decreased habitat quality 
-- However, drought affects also community composition:
+- We lack numeric approaches for ecosystem response 
+to drought. 
+- Biotic integrity metrics **should** detect land use 
+changes resulting in decreased habitat quality. 
+- Drought timing, magnitude, and duration also affects
+community composition, and in different ways:
 + *Predictible* seasonal drought -> **community resistance & 
 resilience** 
 + *Unpredictable* supra-seasonal drought -> **regime shift**
+
 
 Hypothesis & Project Design
 ========================================================
@@ -30,12 +39,53 @@ Hypothesis & Project Design
 community regime shift for Northern Great Plains 
 streams.** 
 
-To validate and design solution, I plan to:
+To test hypothesis, I plan to:
 
-1. Quantify drought magnitudes for streams
-2. Test effect of drought on invertebrate regime shift
-3. Develop IBI metrics with robust invertebrates  
-4. Update OST watershed protection plan with updated IBI metrics
+1. Quantify drought process at watershed scale
+2. Test effect of drought on invertebrate community
+3. Compare results to other dryland studies  
+
+
+
+
+General Description of Study Area
+========================================================
+- Northern Great Plains - Pine Ridge Reservation
+- BSk climate: semi-arid cold mid-latitude steppe 
+- Elevation: 2,250 to 3,700 ft (690 - 1,130 m)
+- Precipitation: 15.8 to 17.2 inches (400 - 450 mm)
+- Mixed-grass prairie with pine savanna on 
+N. slopes; cottonwood woodlands to ash-elm forest 
+- Cattle ranching with minor grass & row crops (N-SE)
+
+
+
+
+Study Area Ecoregions
+========================================================
+
+- Nebraska Sand Hills: Stabilized sand dunes ($Q_{SH}$)
+SW-groundwater interface - constant base flow
+- Keya Paha Tablelands: Soft sandstone plains ($T_A$)
+Riparian Ash-Elm forest overstory
+- Pine Ridge Escarpment: Sandstone ridges ($T_A$)
+Ponderosa Pine & Ash-Elm forest overstory
+- White River Badlands: Escarpments ($T_{WR}$)
+Cottonwood-willow woodlands over turbid ephemeral streams 
+
+
+
+
+Study Area Streams
+========================================================
+- Low gradient dune-ripple morphology streams 
+with well-developed floodplains.   
+- Nebraska Sand Hills - Little White River:
+Eastward flowing, baseflow dominated E5 stream type 
+- Keya Paha Tablelands & Keya Paha Tablelands: North flowing 
+mixed-flow, low turbidity C6 or E6 stream-types 
+- White River Badlands: North flowing event-dominated, high turbidity 
+from constant stream channel adjustment between C6 – G6 – F6 – E6 morphologies. 
 
 
 How to define drought?
@@ -65,8 +115,10 @@ to meet evapotranspiration & vegetation demands
 deficit lagging precipitation deficit & recovery 
 
 - **Ecological drought** water shortage causing 
-ecosystem stress & adversely to plants and animals by
+ecosystem stress & adversity to plants and animals by
 flow reduction, higher water temps & salinity 
+
+
 
 
 Drought Index Recomendations
@@ -86,109 +138,131 @@ hydrological drought
 - **No WMO recommendations** for ecological drought.
 
 
-General Description of Study Area
-========================================================
-- Northern Great Plains - Pine Ridge Reservation
-- Climate: semi-arid mid-latitude cold steppe climate (BSk) 
-- Elevation: 2,250 - to 3,700 ft (xxx m)
-- Precipitation: 15.8 to 17.2 inches (xxx m)
-- Mixed-grass prairie with Ponderosa savanna on N. slopes
-- Cattle ranching with minor grass & row crops (N-SE)
-
-Study Area Ecoregions
+Drought Index Theory
 ========================================================
 
-- Nebraska Sand Hills: Stabilized sand dunes ($Q_{SH}$)
-SW-groundwater interface - constant base flow
-- Keya Paha Tablelands: Soft sandstone plains ($T_A$)
-Riparian Ash-Elm forest overstory
-- Pine Ridge Escarpment: Sandstone ridges ($T_A$)
-Ponderosa Pine & Ash-Elm forest overstory
-- White River Badlands: Escarpments ($T_{WR}$)
-Cottonwood-willow woodlands over turbid ephemeral streams 
+- Precipitation or streamflow deficit or excess 
+represents a Markov process
 
-Study Area Streams
+- SPI-SPEI-SDI "unskew" precipitation time-series into 
+normalized wet or dry monthly or longer duration
+ 
+- Underlying distribution estimated by L-moments.
+
+- Pearson III, log-Logistic & log-Pearson III provide
+good fits, respectively.
+**Not clear which is which...**
+
+Approach & Methods
 ========================================================
-- Low gradient dune-ripple morphology streams 
-with well-developed floodplains.   
-- Nebraska Sand Hills - Little White River:
-Eastward flowing, baseflow dominated E5 stream type 
-- Keya Paha Tablelands & Keya Paha Tablelands: North flowing 
-mixed-flow, low turbidity C6 or E6 stream-types 
-- White River Badlands: North flowing event-dominated, high turbidity 
-from constant stream channel adjustment between C6 – G6 – F6 – E6 morphologies. 
+**Drought is a key driver of macroinvertebrate 
+community regime shift for Northern Great Plains 
+streams.** 
 
-Materials and Methods
+**Q1:** What are the relationships between drought types?
+- Precipitation, soil moisture, stream flow droughts
+
+**Q2:** What are abiotic drivers of regime shift?
+- $\Delta$ water quality vs. $\Delta$ water quantity
+
+**Q3:** Which taxa groups are resilient to $\Delta$ water quantity 
+& indicate $\Delta$ water quality (e.g land use change)
+
+
+Q1: Relationships between drought types 
 ========================================================
 
-![plot of chunk unnamed-chunk-1](Ecol_Drought_Prediction_Proposal-figure/unnamed-chunk-1-1.png)
+| TASK | DATASET(S) | METHOD | OUTCOME |
+|------|:-----|:---------:|:------:|
+| 1. Calculate SPI, SPEI & SDI indices | $\bar{x}$ monthly precip., temp. & discharge | 'SPEI' package & new code | Indices at 3, 6, 9 & 12-month scales |
+| 2. Pair met. stations & gages |	Geographic coordinates |	Thiessen poly. --- 'deldir' |	Paired datasets |
+| 3. Characterize hydrology | Indices at 3, 6, 9 & 12-month scales |	Coefficient of determination | Watershed characteristics |
+| 4. Cluster similar watersheds | Mean daily streamflow | ‘clValid’ & 'vegan' | Gaged watshed groups |
+|	5. Cluster ungaged watersheds |	gSSURGO data for SD & Neb. | ArcGIS & ‘randomForest’ | Ungaged watshed groups |
 
-Q1: What are the relationships between drought types
-========================================================
-
-For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
-
-- Bullet 1
-- Bullet 2
-- Bullet 3
 
 Q2: What are abiotic drivers of regime shift?
 ========================================================
 
+| TASK | DATASET(S) | METHOD | OUTCOME |
+|------:|:-----|---------|:------:|
+| 1. Visualize compositional species patterns | Taxa – site & environmental – site matrices --- SDI indices & WQ parameters	| Non-metric dimensional scaling (NMS) ordination by CRAN ‘vegan’ package |	Estimate environmental gradients |
+| 2. Compare community differences for non-drought vs. drought years | Taxa – site matrix, environmental – site matrix |	PERMANOVA	| Test drought hypothesis |
 
-```r
-summary(cars)
-```
 
-```
-     speed           dist       
- Min.   : 4.0   Min.   :  2.00  
- 1st Qu.:12.0   1st Qu.: 26.00  
- Median :15.0   Median : 36.00  
- Mean   :15.4   Mean   : 42.98  
- 3rd Qu.:19.0   3rd Qu.: 56.00  
- Max.   :25.0   Max.   :120.00  
-```
-
-Q3: Which taxa groups are drought-resilient & indicate WQ
+Q3: How do results compare with other dryland studies?   
 ========================================================
 
-![plot of chunk unnamed-chunk-3](Ecol_Drought_Prediction_Proposal-figure/unnamed-chunk-3-1.png)
+| TASK | DATASET(S) | METHOD | OUTCOME |
+|------:|:-----|---------|:------:|
+| 1. Visualize compositional species patterns 
+| Taxa – site & environmental – site matrices --- SDI indices & WQ parameters	
+| Non-metric dimensional scaling (NMS) ordination by CRAN ‘vegan’ package 
+|	Estimate environmental gradients |
+
+| 2. Compare community differences for non-drought vs. drought years | Taxa – site matrix, environmental – site matrix |	PERMANOVA	| Test drought hypothesis |
+
+
+
+
+
 
 Expected Results
 ========================================================
 
-For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+* **Drought drives community change** --- based on several rejected hypotheses;
+* More interesting is *variance along gradients*: drought magnitude, water quality & watershed physiology
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+* **Seasonal drought** --- resilience & recovery within one-year
+* **Supra-seasonal drought** --- regime shift to smaller-bodied & r-selected taxa; more gastropods
 
-Work Plan/Timetable
+* **Baseflow buffers against change**: resistance & resilience directly correlated with baseflow
+
+
+Work Plan/Timetable 1/x
 ========================================================
 
 
-```r
-summary(cars)
-```
-
-```
-     speed           dist       
- Min.   : 4.0   Min.   :  2.00  
- 1st Qu.:12.0   1st Qu.: 26.00  
- Median :15.0   Median : 36.00  
- Mean   :15.4   Mean   : 42.98  
- 3rd Qu.:19.0   3rd Qu.: 56.00  
- Max.   :25.0   Max.   :120.00  
-```
+| DATE | OBJECTIVE(S) |	TASK(S)	| MILESTONE(S) | OTHER |
+|------:|:-----|---------|:------:|:-----:|
+| 2018--04 | PhD Candidacy |	Committee Approval |	Written & oral proposal feedback | |
+| 2018--05 | Outline Dissertation | Create GitHub repository in Thesisdown format | Knit three dissertation chapters | Complete water policy paper & NSF dissemination |
+| 2018--06 | Complete Objective 1	| calculate drought indices, characterize watershed hydrology, cluster watersheds | Characterize droughts, gaged watersheds, ungaged watersheds | Journal identification |
 
 
-Map of Study Area
+Work Plan/Timetable 1/x
+========================================================
+| DATE | OBJECTIVE(S) |	TASK(S)	| MILESTONE(S) | OTHER |
+|------:|:-----|---------|:------:|:-----:|
+| 2018--08 | Complete Objective 2 | NMS Ordination | Data munging, Visualize taxa patterns |	OST	Dissemination |
+| 2018--09 | Prepare for completion | Revisit timeline | Identify Journals | SDSMT Seminar Dissemination |
+| 2018--10 | Complete Objective 3 | Update IBI & WPP | PERMANOVA | |
+| 2018--11 | Prepare for PhD defense  | Finalize draft dissertation | Validate formatting | schedule date |
+| 2018--12 | PhD defense  |  |  |  |
+
+
+
+
+
+
+
+
+
+Overview of Study Area
 ========================================================
 
 
 
+![plot of chunk library](Ecol_Drought_Prediction_Proposal-figure/library-1.png)
+
+
+
+Overview of Study Area
+========================================================
+
+
 
 ```
-Error in map_data("state") : could not find function "map_data"
+Error in download.file(url, destfile = tmp, quiet = !messaging, mode = "wb") : 
+  cannot open URL 'http://maps.googleapis.com/maps/api/staticmap?center=34.753117,-119.751324&zoom=15&size=640x640&scale=2&maptype=terrain&language=en-EN&sensor=false'
 ```

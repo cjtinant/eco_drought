@@ -20,41 +20,19 @@ This worksheet contains meta-analytical ideas and resources to improve the effic
 
 # Next Steps
 * Finish reading project structure
-* check out 'roxygen2', 'packrat'
-
-
-
-# Project structure
-This outlines project as package by 'Efficient R Programming'----
-
-Improve project management and workflow by treating projects as R packages. An intermediate approach is to use a ‘dummy package’ that includes a DESCRIPTION file in the root directory to tell which packages must be installed for the code to work.  Example is 'Efficient R Programming' based on a dummy package so that they can easily keep dependencies up-to-date (see DESCRIPTION file)
-
-Creating packages teaches correct code documentation, storage of example data, and reproducibility via vignettes. But it can take a lot of extra time.
-
-The DESCRIPTION file contains key information about the package, including which packages are required for the code contained in your package to work, e.g. using Imports:. This is efficient because it means that anyone who installs your package will automatically install the other packages that it depends on.
-
-The R/ folder contains all the R code that defines package functions. Placing code in a single place and keeping code modular can greatly reduce code duplication. Furthermore, *documentation of R packages through Roxygen tags such as: 'This function does this...' makes it easy for others to use your work.* This form of efficient documentation is facilitated by the **roxygen2** package.
-
-# The data/ folder contains example code for demonstrating to others
-# how the functions work and transporting datasets that will be
-# frequently used in your workflow. Data can be added automatically
-# using the devtools package, with devtools::use_data().
-# This can increase efficiency by providing a way of distributing
-# small to medium sized datasets and making them available when the
-# package is loaded with the function data('data_set_name').
-
-# The package testthat makes it easier than ever to test your R code
-# as you go, ensuring that nothing breaks.
-# For more on R packages see (Wickham 2015): the online version
-# provides all you need to know about writing R packages for free
-# (see r-pkgs.had.co.nz/).
-
-# thoughts-on-thesisdown
-1. look into making a vingette for thesisdown  
+* check out 'packrat'
+* IO: odbc readxl httr 
+* EDA: DataExplorer
+* Sampling: rsample modelr
+* Feature Engineering: recipes
+* Modelling: glmnet h2o FFTrees
+* Evaluation: broom yardstick
+* Deployment: sqlrutils AzureML opencpu
+* Monitoring: flexdashboard
+* Identifying packages used: grateful
 
 ```{r library}
-# To set up the thesis
-library("here") # sets up a home for your work
+# Sets up the package library
 library("DiagrammeR") # used to call 'mermaid' for a Gantt chart
 library("thesisdown") # used to knit a thesis follows bookdown
 library("bookdown") # 
@@ -67,12 +45,17 @@ library(rio) # more robust I/O
 library("tidyverse")
 
 # to make a map and plot figures
-library(ggmap)
+
 library(maps) # outlines of continents, countries, states & counties 
 library(mapdata) # higher-resolution outlines.
 library(ggplot2) # used to plot maps in the `maps` package.
+library(ggmap)
+library(here)
+here()
 ```
-```{r gantt-big, fig.align='left', fig.width = 12}
+
+# Dissertation Gantt Chart
+```{r gantt-big, fig.align='left', fig.width = 50}
 # Gantt project with all of the steps for completion----
 # https://mermaidjs.github.io/gantt.html
 
@@ -85,13 +68,20 @@ library(ggplot2) # used to plot maps in the `maps` package.
 # Realistic: have sufficient resources been allocated to the task?
 # Time-bound: is there an associated completion date or milestone?
 
+
+## 0. Preproposal tasks 
+### 0.1.0  Outline Proposal 
+### 0.2.0 Document ThesisDown
+# 0.2.1 Read/summarize manual
+#0.2.2 Pull request in GITHUB 
+
 mermaid("gantt
        dateFormat  YYYY-MM-DD
-       title Gantt chart for PhD completion
-       section PhD Candidacy
+       title Dissertation overview
+       section Preparation
        Sent draft proposal        :done,    can1, 2018-04-10, 1d
-       Committee review           :active,  can2, after can1, 10d
-       Schedule defense           :         can3, 2018-04-17, 1d
+       Committee review           :active,  can2, after can1, 21d
+       Schedule defense           :         can3, 2018-05-02, 1d
        Incorporate edits          :         can4, after can2, 5d
        Send final draft           :         can5, after can4, 1d
        Oral defense               :         can6, 2018-05-05, 1d
@@ -126,7 +116,113 @@ mermaid("gantt
 ")
 ```
 
-*The following could be moved to Asana*
+```{r gantt-big, fig.align='left', fig.width = 80}
+mermaid("gantt
+       dateFormat  YYYY-MM-DD
+       title Full  for PhD completion Gantt chart
+ 
+      section PhD Candidacy
+       Sent draft proposal        :done,    can1, 2018-04-10, 1d
+       Committee review           :active,  can2, after can1, 21d
+       Schedule defense           :active,  can3, 2018-05-02, 1d
+       Incorporate edits          :         can4, after can2, 5d
+       Send final draft           :         can5, after can4, 1d
+       Oral defense               :         can6, 2018-05-21, 1d
+
+      section Preparation
+       Candidacy                  :done,    pre1, 2018-04-10, 1d
+       Committee review           :active,  pre2, after pre1, 21d
+       Schedule defense           :active,  pre3, 2018-05-02, 1d
+       Incorporate edits          :         pre4, after pre2, 5d
+       Send final draft           :         pre5, after pre4, 1d
+       Oral defense               :         pre6, 2018-05-10, 1d
+
+       section Characterize drought
+       Outline project            :active,   dro1, 2018-04-10, 4d
+       Calculate SPI & SPEI       :          dro2, after dro1, 21d
+       Develop SDI                :          dro3, after dro2, 30d 
+       Cluster time series        :          dro4, after dro3, 10d  
+       Watershed delineation      :          dro5, after dro4, 7d 
+       Cluster ungaged sta. by RF :          dro6, after dro5, 21d
+       Write results              :          dro7, after dro6, 14d 
+       NSF dissemination          : crit,    dro8, 2018-06-21, 3d 
+       Identify journal           : crit,    dro9, after can6, 21d 
+
+       section Taxa patterns
+       Collect macros with OST    :        tax1, 2018-06-14, 5d
+       Munge macro data           :        tax2, after dro7, 14d
+       NMS ordination             :        tax3, after tax2, 14d
+       PERMANOVA                  :        tax4, after tax3, 14d
+       Write results              :        tax5, after tax4, 30d
+       OST dissemination          : crit,  tax6, 2018-09-15, 1d 
+       Identify journal           : crit,  tax7, after dro7, 21d 
+
+     section Drought indicators
+       ISA analysis               :        ind1, after tax5, 30d
+       IBI metrics                :        ind2, after ind1, 30d
+       Update OST WPP             :        ind3, after ind2, 30d
+       Write results              :        ind4, after ind3, 30d
+       SDSMT dissemination        : crit,  ind5, 2018-10-30, 1d 
+       Identify journal           : crit,  ind6, after tax5, 21d 
+")
+```
+
+## 1. Characterize drought
+### 1.0.0 Calculate Drought Indices
+1.1.0 Download station data  *what is the URL?* 
+1.1.1 Identify functional programming purrr::map()
+
+### 1.2.0 Calculate SPI
+
+### 1.3.0 Calculate SDEI
+
+### 1.4.0 Calculate SDI
+
+### 1.5.0 Calculate SDI
+1.5.1 Develop SDI function
+
+
+### 1.6.0 Cluster time series  
+
+### 1.7.0 Delineate watersheds
+
+### 1.8.0 Cluster ungaged stations
+1.8.1 learn 'rf' function
+
+### 1.9.0 Disseminate results
+1.9.1 Write results
+1.9.2 NSF dissemination
+1.9.3 Identify journal
+
+## 2. IBI Metrics - Chapter 2
+### 2.1.0 NMS ordination
+2.1.1 clean macro data  
+2.1.1 NMS ordination
+
+### 2.2.0 PERMANOVA
+ 
+### 2.3.0 Outreach & Disseminate results
+
+### 2.4.0 Collect macros with OST**
+2.4.1 Write results
+2.4.2 OST dissemination
+2.4.3 Identify journal
+
+## 3.0 Chapter 3 - Drought Indicators
+3.1.0 ISA analysis 
+3.2.0 IBI metrics 
+3.3.0 Outreach & Disseminate results
+3.4.0 Update OST WPP
+
+**3.2.0 Write results**
+
+**3.3.0 SDSMT dissemination**
+
+**3.4.0 Identify journal**
+
+# Purpose
+This worksheet contains meta-analytical ideas and resources to improve the efficiency of dissertation writing.
+
 ## 0. Preproposal tasks 
 ### 0.1.0  Outline Proposal 
 ### 0.2.0 Document ThesisDown
@@ -212,6 +308,7 @@ mermaid("gantt
        Identify journal           : crit,    dro9, after can6, 21d 
 ")
 ```
+
 ```{r import-data}
 # use RIO or dataRetreval----
 ```
@@ -224,7 +321,58 @@ mermaid("gantt
 [patchwork](https://github.com/thomasp85/patchwork/tree/master/R])
 
 # Analysis
-[Decision Trees tutorial](https://github.com/GeostatsGuy/geostatsr) 
+[Decision Trees tutorial1](https://github.com/GeostatsGuy/geostatsr)
+[Decision Trees tutorial2](https://heartbeat.fritz.ai/introduction-to-decision-tree-learning-cd604f85e236)
+
+
+# Project structure
+This outlines project as package by 'Efficient R Programming'----
+
+Improve project management and workflow by treating projects as R packages.  Creating packages teaches correct code documentation, storage of example data, and reproducibility via vignettes. But it can take a lot of extra time.
+
+The R/ folder contains all the R code that defines package functions. Placing code in a single place and keeping code modular can greatly reduce code duplication. Furthermore, *documentation of R packages through Roxygen tags such as: 'This function does this...' makes it easy for others to use your work.* This form of efficient documentation is facilitated by the **roxygen2** package. 
+
+The data/ folder contains example code for demonstrating to others how the functions work and transporting datasets that will be frequently used in your workflow. Data can be added automatically using the devtools package, with devtools::use_data(). This can increase efficiency by providing a way of distributing small to medium sized datasets and making them available when the package is loaded with the function data('data_set_name').
+
+The package **testthat** makes it easier than ever to test your R code as you go, ensuring that nothing breaks.
+An intermediate approach is to use a ‘dummy package’ that includes a DESCRIPTION file in the root directory to tell which packages must be installed for the code to work.  Example is 'Efficient R Programming' based on a dummy package so that they can easily keep dependencies up-to-date (see DESCRIPTION file)
+
+The DESCRIPTION file contains key information about the package, including which packages are required for the code contained in your package to work, e.g. using Imports:. This is efficient because it means that anyone who installs your package will automatically install the other packages that it depends on.
+
+For more on R packages see (Wickham 2015): the online version
+provides all you need to know about writing R packages for free (see r-pkgs.had.co.nz/).
+
+
+# Introduction to roxygen2
+*Introduction to roxygen2 vignette*
+Documentation is one of the most important aspects of good code. Without it, users won’t know how to use your package, and are unlikely to do so. Documentation is also useful for you in the future (so you remember what the heck you were thinking!), and for other developers working on your package. The goal of roxygen2 is to make documenting your code as easy as possible. R provides a standard way of documenting packages: you write .Rd files in the man/ directory. These files use a custom syntax, loosely based on latex. Roxygen2 provides a number of advantages over writing .Rd files by hand:
+
+Code and documentation are adjacent so when you modify your code, it’s easy to remember that you need to update the documentation.  Roxygen2 dynamically inspects the objects that it’s documenting, so it can automatically add data that you’d otherwise have to write by hand.  It abstracts over the differences in documenting S3 and S4 methods, generics and classes so you need to learn fewer details.
+
+As well as generating .Rd files, roxygen will also create a NAMESPACE for you, and will manage the Collate field in DESCRIPTION.
+
+This vignette provides a high-level description of roxygen2 and how the three main components work. The other vignettes provide more detail on the individual components:
+
+Generating .Rd files and text formatting describe how to generate function documentation via .Rd files
+
+Managing your NAMESPACE describes how to generate a NAMESPACE file, how namespacing works in R, and how you can use Roxygen2 to be specific about what your package needs and supplies.
+
+Controlling collation order describes how roxygen2 controls file loading order if you need to make sure one file is loaded before another.
+
+Running roxygen
+
+There are three main ways to run roxygen:
+
+roxygen2::roxygenise(), or
+
+devtools::document(), if you’re using devtools, or
+
+Ctrl + Shift + D, if you’re using RStudio.
+
+As of version 4.0.0, roxygen2 will never overwrite a file it didn’t create. It does this by labelling every file it creates with a comment: “Generated by roxygen2: do not edit by hand”.
+
+# thoughts-on-thesisdown
+1. look into making a vingette for thesisdown  
 
 ```{r tidy-data}
 # Tidyr and dplyr example using the fivethirtyeight package ----
@@ -720,11 +868,23 @@ sbbox <- make_bbox(lon = sisquoc$lon, lat = sisquoc$lat, f = .1)
 
 
 ```{r ggmap-satelite}
+library(ggmap)
 ll_means <- sapply(sisquoc[2:3], mean)
 
 sq_map2 <- get_map(location = ll_means,  maptype = "satellite", source = "google", zoom = 15)
 
+sq_map2 <- get_map(location = ll_means,  maptype = "terrain", source = "google", zoom = 15)
+
 ggmap(sq_map2) + 
+      geom_point(data = sisquoc, color = "red", size = 4) +
+      geom_text(data = sisquoc, aes(label = paste("  ", 
+      as.character(name), sep = "")), angle = 60, hjust = 0, 
+      color = "yellow")
+
+write.table(sq_map2,file = "data/sq_map2")
+
+sq_map2 <- read.table(file = "data/sq_map2")
+ggmap(data/sq_map2) + 
       geom_point(data = sisquoc, color = "red", size = 4) +
       geom_text(data = sisquoc, aes(label = paste("  ", 
       as.character(name), sep = "")), angle = 60, hjust = 0, 
@@ -865,4 +1025,10 @@ ggsave(paste("bc_region", MyRegion, ".pdf", sep = ""), the_map,
 
 dump <- lapply(unique(bc$region), region_plot)
 ```
+
+
+
+
+
+
 
