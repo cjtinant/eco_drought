@@ -1,0 +1,888 @@
+---
+title: "Watershed Assessment and Non-Point Source Management Plan Recommendations for 
+Pine Ridge Reservation Bear Lodge Subwatershed"
+author: "Charles Jason Tinant"
+date: "3/6/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Project Folder Setup 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The project has a folder with the following structure:
+# R - contains scripts
+# Data - contains the raw data, after the start of the project,
+#        this folder is locked from editing
+# Plots
+# Output - contains all files produced by scripts which are not graphics
+# Manuscript - contains manuscripts that integrate plots and output 
+#              through an literate programming, such as Sweave or R Markdown.
+#               For now, this contains Word files.
+
+```
+
+## Monitored in 2012 - 2013
+
+### Prepared for
+### Oglala Sioux Tribe
+### Environmental Protection Program
+### Pine Ridge, SD 57770
+
+### Prepared by
+### Charles Jason Tinant
+### MS Water Resources Engineering
+
+### Oglala Lakota College
+### 490 Piya Wiconi Road
+### Kyle, SD 57752
+
+
+## 1.0	Introduction
+The Oglala Sioux Tribe (OST) Water Pollution Control Program is responsible for developing watershed based plans for water quality restoration, identifying impacts to water quality, implementing the monitoring program and to identify best management practices.
+
+In September 2005 Tetra Tech, Inc. developed an NPS Assessment Report and NPS Management Program Plan for the Environmental Protection Agency (EPA) and the OST.  The NPS plan complies with guidelines associated with Section 319 of the Clean Water Act.  Matrix Consulting reviewed the NPS Assessment Report and NPS Management Plan in 2010 and analyzed water quality data for the Wounded Knee and Porcupine subwatersheds for 2005-2009. 
+
+The Oglala Lakota College (OLC) Science Technology Engineering and Mathematics (STEM) Department reviewed the Matrix Consulting report and analyzed water quality for 2008-2011 and macroinvertebrate data for 1993-2011 as a service-learning project.  This report is a continuation of the OST-OLC partnership.  The goal of this report is to provide guidance to the OST Water Pollution Control Program on stream health on the Pine Ridge Reservation (Figure 1).  The specific objectives of the report are: 1) analyze and complarewater quality data collected by the Oglala Sioux Tribe (OST) Water Quality Program historically from 1993-2011, and for 2012-2013, 2) integrate macroinvertebrate sampling data collected historically from 1993-2011 are for 2012-2013, and to 3) to refine recommendations for future monitoring and implementation of best management practices (BMPs). 
+
+## 1.1	Regional Climate and Geology 
+The climate is typical of the Northern Great Plains with a median temperature of 50F in January and 73 degrees F in July (SDSU climate website, accessed March 6, 2013).  The average annual precipitation between the years 1971 and 2000 at the Manderson 3 NE station is 19.3 inches with January as the driest month (0.39 inches) and June as the wettest month (3.18 inches).  The Manderson station is slightly drier than the rest of the south-central region of South Dakota, which has an average precipitation of 21.6 +/- 4.5 inches (standard deviation) (SDSU climate website, accessed March 6, 2013).  The Keya Paha Tablelands receives a mean annual precipitation of 16-20 inches while the Pine Ridge Escarpment receives 16-17 inches (Bryce et al, 1998).  The Great Plains has an historical record of major drought (Meyer et al. 1999).  The 2012 drought resulted in zero flow conditions in the White River and a majority of White River tributary streams (Tinant personal observation).  
+The amount and frequency of hydrological exchange between the floodplain, groundwater and the stream depends on geology and alluvial composition. Upper White River tributaries begin in central Nebraska as springs. Middle White River tributaries begin in Arikaree Group sandstones and siltstones, and then flow across White River Group volcaniclastic claystones, before draining into the White River (Bryce et al. 1998, Heakin 1999). Sandier units of the Arikaree group form water table aquifers that sustain base flow in the upper reaches of White River tributaries (Heaken 1999).  The hydrologic regime shifts from a mixed flow regime to an event-dominated regime as streams cross the Arikaree Group – White River Group contact as infiltration rates decrease and the volume of overland flow increases (Foreman 2006).   Infiltration, percolation and ground water flow dominates Sandhills ecoregion hydrology in the Little White River watershed.  
+
+# Insert Figure 2: Flow Duration Curves for the White River and Little White River Watersheds
+
+## 1.2	Watershed Boundaries, Communities, and Land Use Descriptions
+The White River Basin is the most southern of five major drainages in South Dakota that enter the Missouri River from the west (Matrix 2010). The watershed divide with the Cheyenne River is along the northwest corner of the Pine Ridge Reservation (PRR).  The upper White River Basin extends south to the southern border of the PRR. Watersheds were subdivided into the following subwatersheds for the NPS Management Program Plan (Figure 1).  The major economic land uses in the White River watershed are agriculture-related with rangeland and cropland dominating in the Little White River subwatershed and rangeland and hay farming dominating all other subwatersheds.  Community wastewater collection systems with treatment lagoons are used to treat municipal waste in PRR communities (Tetra Tech, Inc. 2005, Matrix 2011).  The Oglala Sioux Tribe (OST) currently maintains 38 water-quality monitoring stations in the White River and Cheyenne River Basins.
+
+# Insert Figure 1
+```{r figure.onw}
+map1 <- suppressMessages(
+  get_map(location = c(-101.8, 43.3206149), zoom = 8,
+  maptype="roadmap")) 
+ggmap(map1)
+```
+
+###	1.2.1 Cheyenne River Tributaries
+The Cheyenne River drains the northwestern corner of the reservation with the Cheyenne River itself forming 17.2 miles of the reservation boundary. The Cheyenne River drains to the Missouri River; the confluence is northeast of the reservation boundary (Tetra tech 2005). The Cheyenne River watershed, within reservation boundaries, includes western portions of Badlands National Park, including the Badlands Bombing Range, tribal and non-tribal ranching activities, irrigated crop production, and the community of Red Shirt Village (population approximately 150) (Tetra tech 2005, Matrix 2011).  The Cheyenne River watershed contains two stations on the Cheyenne River (CHR1 and CHR2) (Tetra tech 2005, Matrix 2011).
+
+###	Upper White River
+Upper White River watershed, which extends within reservation boundaries from the southern border of the Pine Ridge Reservation to above the confluence with Wounded Knee Creek, drains the southwestern corner of the reservation including the towns of Oglala and Pine Ridge. The White River enters the reservation from the south and flows north through the Upper White River watershed. The White River’s confluence with White Clay Creek, which is northwest of the town of Oglala, is the boundary of the Upper White River watershed and the White River/Wounded Knee Creek watershed (Tetra tech 2005).  The Upper White River subwatershed includes tribal and nontribal ranching activities and the communities of Oglala (population approximately 2,000) and Pine Ridge (population approximately 4,000). Both Oglala and Pine Ridge are served by community wastewater collection systems; there at least four treatment lagoons between these two communities. The Prairie Wind Casino, near the town of Oglala, is also served by a sewage collection and treatment lagoon system (Tetra tech 2005, Matrix 2011).  The Upper White River subwatershed includes three monitoring stations on White Clay Creek (WCC1 – WCC3), a station on Wolf Creek (WOL1), and a station on the White River (WHR1).  
+
+### 1.2.2 White River/Wounded Knee Creek
+The White River/Wounded Knee Creek subwatershed drains the western portion of the reservation from the Upper White River subwatershed to the south to the Cheyenne River watershed to the northwest. The southeastern portion of the White River/Wounded Knee Creek subwatershed extends south to the southern border of the reservation. The White River flows into the White River/Wounded Knee Creek subwatershed from the Upper White River watershed and flows approximately 67.3 miles north and northeast to the boundary with the White River/Medicine Root Creek watershed near the White River confluence with Porcupine Creek (Tetra tech 2005). The White River/Wounded Knee Creek subwatershed, within reservation boundaries, includes southern portions of the Badlands, tribal and non-tribal ranching activities, hay farming, and the communities of Rockyford, Sharps Corner (population approximately 150), Porcupine (population approximately 1,000), Manderson (population approximately 1,000), and Wounded Knee (population approximately 800). All of these communities are served by community wastewater collection systems with treatment lagoons  (Tetra tech 2005, Matrix 2011).  The White River/Wounded Knee Creek subwatershed includes four stations on Wounded Knee Creek (WOK1 – WOK4), three stations on Porcupine Creek (POR1 – POR3) and a station on the White River (WHR2). 
+
+### 1.2.3 White River/Medicine Root Creek
+The White River/Medicine Root Creek subwatershed drains the reservation from the northwestern corner of Bennett County to the northern border of the reservation and west to the boundary of the Cheyenne River watershed. The White River flows into the White River/Medicine Root Creek subwatershed from the White River/Wounded Knee Creek subwatershed and flows approximately 37.1 miles northeast to the boundary with the White River/Bear-in-the-Lodge Creek subwatershed near the White River’s confluence with Red Water Creek (Tetra tech 2005).  The White River/Medicine Root Creek subwatershed includes portions of Badlands National Park, including portions of the Badlands Bombing Range, tribal and non-tribal ranching activities, and the community of Kyle (population approximately 2,000).  Kyle is one of the fastest-growing communities on the reservation (Tetra tech 2005).  Kyle is served by a community wastewater collection system with treatment lagoons (Matrix 2011).  An infiltration gallery for the Mni Wiconi Drinking Water project, which is located along the American Horse Creek alluvium, will be moved to the Medicine Root Creek alluvium in 2017.  The White River/Medicine Root Creek subwatershed includes three stations on Medicine Root Creek (MER1, MER3, MER4), a station on No Flesh Creek (NFL1), a station on American Horse Creek (AMH1), and a station on Red Water Creek (RED1).  
+
+### 1.2.4 White River/Bear-in-the-Lodge Creek
+The White River/Bear-in-the Lodge Creek subwatershed encompasses approximately 734 square miles of the reservation from north of Highway 18 in Bennett County north to the White River at the northern border of the reservation. The White River flows into the White River/Bear-in-the-Lodge Creek subwatershed from the White River/Medicine Root Creek subwatershed and flows approximately 44.2 miles east to the boundary with the White River/Pass Creek subwatershed near the White River confluence with Eagle Nest Creek (Tetra tech 2005).  The White River/Bear-in-the-Lodge Creek subwatershed includes portions of Badlands National Park and portions of the Badlands Bombing Range, tribal and non-tribal ranching activities, and the communities of Potato Creek, Allen, and Hisle (population approximately 20).  The White River/Bear-in-the-Lodge Creek subwatershed includes stations on the Bear Creek and Bear in the Lodge Creek complex (BEA1 – BEA3, BLC1, BLC2), a station on Potato Creek (POT1), a station on Lost Dog Creek (LDC1), a station on Corn Creek (COR1), two stations on Eagle Nest Creek (EAN1, EAN2) on Craven Creek (CRA1), a station on Long Creek (LON1), and a station on the White River (WHR5).
+
+
+
+
+### 1.2.5 White River/Pass Creek
+The White River/Pass Creek subwatershed encompasses approximately 746 square miles of the reservation from just north of Highway 18 in Bennett County north to the White River at the northern border of the reservation and east to the eastern border of the reservation (see Figure 2).  The White River flows into the White River/Pass Creek subwatershed from the White River/Bear-in-the-Lodge Creek subwatershed and flows approximately 40.5 miles along the northern border of the reservation east to the reservation boundary (Tetra tech 2005).
+The White River/Pass Creek subwatershed includes portions of Badlands National Park, tribal and non-tribal ranching activities, irrigated agriculture including alfalfa and corn production, and the communities of Wanblee (population approximately 1,500), Long Valley (population approximately 100), and Vetal (population approximately 50). The communities of Long Valley and Vetal are non-Indian and do not fall under tribal jurisdiction (Matrix 2011). The White River/Pass Creek subwatershed contains a station on Corn Creek (COR1), a station  a station on Buzzard Creek (BUZ1), three stations on Pass Creek (PAS1 – PAS3), and a station on the White River (WHR4), and a station on Blackpipe Creek (BLP1).
+
+### 1.2.6 White River/Little White River
+The Little White River watershed encompasses approximately 604 square miles of the reservation from the southern boundaries of the White River/Medicine Root Creek/Bear-in-the-Lodge Creek/Pass Creek subwatersheds south to the northern boundary of the Niobrara River Tributaries watershed and from the southeastern boundary of the White River/Wounded Knee Creek subwatershed east to the eastern reservation border. The Little White River flows through the watershed from west to east. The river’s headwaters are in Shannon County, near U.S. Highway 18. The Little White River flows off the reservation near the southeastern corner. The Little White River flows to the White River; the rivers’ confluence is east of the reservation in Mellette County, just downstream of U.S. Highway 83.  The Little White River watershed includes LaCreek Migratory Waterfowl Refuge, tribal and non-tribal ranching activities, dryland and irrigated agriculture, and the communities of Martin (population approximately 2,500), Batesland, Tuthill (approximately 10 to 15 houses), and Swett. The communities of Martin, Tuthill, Batesland, and Swett are non-Indian and do not fall under tribal jurisdiction; however, there are tribal housing developments near Batesland and Swett. The water table tends to be very shallow in this watershed (Tetra tech 2005).  The Little White River watershed includes four stations on the Little White River.
+
+# Insert Figure 2: Subwatersheds and Surface Water Monitoring Sites on the Pine Ridge Reservation
+
+## 1.4	Beneficial Uses and Water Quality Standards 
+“The purpose of water quality standards is to define the water quality goals of a water body, or portion thereof, by designating the use or uses and identifying criteria necessary to protect the uses.  Each state adopts water quality standards to protect public health or welfare, enhance the quality of water and serve the purposes of the Clean Water Act, established by Congress in 1972” (The U.S. Government's Printing Office 2011). Water Quality Standards consist of Beneficial Uses, Water Quality Criteria, and Anti-degradation Clauses” (Matrix 2011).  The Tetra-tech (2005) and Matrix (2011) reports describe OST and South Dakota administrative rules for beneficial uses, water quality criteria and anti-degradation clauses in effect for the Pine Ridge Reservation. 
+
+The overall goals and objectives of the 106/319 Water Quality Program includes the following goals:
+
+*	Restore and maintain the chemical, physical and biological integrity of the waters within the jurisdiction of OST to preserve and enhance the environment within the jurisdiction of the Tribe. 
+
+*	Conserve waters within the jurisdiction of the Tribe by protecting, maintaining and improving the quality of water for public water supplies, wildlife, fish and aquatic life, recreation, agriculture, industry, cultural and other beneficial uses. 
+
+*	Identify the BMPs and measures to be undertaken to reduce pollutant loading from each category and subcategory of nonpoint source pollution in each watershed, taking into account the impact of best management practices on groundwater quality. 
+
+*	Identify programs to achieve BMPs. 
+
+*	Develop a schedule, with milestones, for the implementation of BMPs in each water within the jurisdiction of the Tribe. 
+
+*	Identify sources of federal funding and other funding available to assist in controlling NPS pollution. 
+
+*	Describe the involvement in NPS pollution control of local public and private agencies and organizations that have experience in controlling of NPS pollution.
+
+# 1.3	 Results of Previous Studies
+The OST monitoring strategy is divided into two phases: Phase I monitoring between 1992-2005 and b) monitoring between 2005-2013 (the latest available data).  Phase I activities focused on site identification, physical, chemical, and macroinvertebrate data collection, and monitoring of common inorganics and metals including heavy metals (Matrix 2011).  Phase II monitoring focusing on physical parameters, pH, temperature, conductivity, dissolved oxygen, temperature, and turbidity, conventional pollutants, biochemical oxygen demand (BOD), total suspended solids (TSS), fecal coliform bacteria, and E-coli, and non-conventional pollutants, ammonia-nitrogen, nitrate-nitrogen, hardness, and total phosphorus.  In 2011, in addition to parameters of concern, Soluble Reactive Phosphorus (SRP) and additional anions and cations were collected in order to better understand phosphorus sources and to develop a more complete understanding of the distribution of common inorganic ions in order to evaluate historical metals data.
+
+## 1.3.1 Results of Sampling between 1993 - 2005
+Tetra Tech (2005) analyzed historical water quality data pre-2005 and found widespread exceedences in several water quality parameters: 
+
+*	Water quality exceedances for Cheyenne River stations occurring in greater than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: pH (upper limit), dissolved oxygen, turbidity, selenium.  Water quality exceedances for Cheyenne River stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: arsenic, cadmium, iron, manganese, mercury, and total phosphorus. 
+
+*	Water quality exceedances for Upper White River sub watersheds occurring in greater than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: turbidity, pH (lower limit).  Water quality exceedances for Upper White River sub watershed stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: pH (upper limit), dissolved oxygen, arsenic, cadmium, iron, manganese, mercury, and total phosphorus. 
+
+*	Water quality exceedances for White River/Wounded Knee Creek stations occurring in less than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: temperature, pH (upper limit), dissolved oxygen, turbidity, selenium.  Water quality exceedances for White River/Wounded Knee Creek stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: arsenic, cadmium, iron, manganese, mercury, and total phosphorus. 
+
+*	Water quality exceedances for White River/Medicine Root Creek stations occurring in greater than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: dissolved oxygen, turbidity, and cadmium.  Water quality exceedances for White River/Medicine Root Creek stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: temperature, pH (upper limit), arsenic, cadmium, iron, manganese, mercury, and total phosphorus. 
+
+*	Water quality exceedances for White River/Bear-in-the-Lodge Creek stations occurring in greater than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: turbidity.  Water quality exceedances for White River/ Bear-in-the-Lodge Creek stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: temperature, pH (upper limit), dissolved oxygen, arsenic, cadmium, iron, manganese, mercury, and total phosphorus. 
+
+*	Water quality exceedances for White River/Pass Creek stations occurring in greater than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: temperature, turbidity, cadmium, selenium and zinc.  Water quality exceedances for White River/Pass Creek stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: pH (upper limit), dissolved oxygen, arsenic, iron, lead, manganese, mercury, and total phosphorus. 
+
+*	Water quality exceedances for White River/Little White River stations occurring in greater than 10% of cases when less than 10 samples were collected (water bodies designated “Threatened”) include: pH (upper limit), dissolved oxygen, turbidity, cadmium, selenium, and silver.  Water quality exceedances for White River/Little White River stations occurring in greater than 10% of cases when greater than 10 samples  (water bodies designated “Impaired”) include: arsenic, iron, lead, manganese, mercury, zinc and total phosphorus. 
+
+## 1.3.2 Discussion of Sampling Results between 1993 - 2005
+Tetra Tech (2005a) concluded that many of the metals exceeding water quality standards in Pine Ridge reservation surface waters could originate from natural sources and proscribed best management practices aimed at reducing total suspended solids and nutrient loading for the following land uses:
+
+*Agricultural Runoff*  
+EPA determined in March 2004 there were approximately 20 cattle ranching operations across the reservation, with agricultural activities include cattle grazing, crop production, and winter feeding and calving areas (Matrix 2011). Crop agriculture, which consists primarily of dryland and irrigated faming for spring and winter wheat, is conducted primarily in the southeastern portion of the reservation. 
+Septic Systems - Approximately 50 percent of households on tribal land are served by individual septic systems (Tetra tech 2005). 
+
+*Storm Water Runoff* 
+Most towns and villages across the reservation lack storm water collection systems. Pine Ridge and Martin have storm water collection systems, however, the Tribe is unaware of any BMPS being implemented to minimize pollutant loads (Tetra tech 2005, Matrix 2011). 
+
+*Illegal Dumping* 
+Improper disposal of domestic solid waste, household appliances and automobiles continue to contribute pollutants to surface waters (Tetra tech 2005, Matrix 2011).  
+
+*Roads* Many roads across the reservation are constructed of dirt and gravel, contributing significant sediment loads to surface waters (Tetra tech 2005, Matrix 2011).   
+Construction - Silt fences and other BMPS do not appear to be used for smaller construction projects.  BMPs could be used to minimize sediment loads from construction projects into surface waters (Tetra tech 2005, Matrix 2011). 
+
+## 1.3.3 Conclusions and Recommendations based on Sampling between 1993 - 2005
+The NPS Management Program Plan (Tetra Tech 2005b) described the process the OST used for the period 2005-2009 to address NPS pollution on the Pine Ridge Reservation as identified in the NPS Assessment Report.  Specific management activities and long-term goals identified in the NPS Management Plan include: 
+
+*	Conducting the administrative activities, assessments, monitoring, and education activities to support and maintain the practices and programs that will be implemented to address NPS pollution.
+
+*	Eliminating grazing-related nonpoint source pollutant contributions to surface waters
+*	Implementing appropriate BMPs to minimize NPS contributions of herbicides and other agricultural chemicals. 
+
+*	Eliminating illegal dumping and minimizing NPS pollutant contributions from the improper disposal of automobiles, appliances, and hazardous waste. 
+
+*	Rehabilitating failing septic systems and relocating poorly sited systems. 
+
+*	Integrating storm water and NPS pollution concerns into road planning and maintenance on the reservation. 
+
+*	Integrating storm water and NPS pollution concerns into construction planning and building activities on the reservation. 
+
+*	Minimizing the NPS pollutant contributions in urban runoff from towns and villages. 
+
+## 1.3.4 Results of Sampling between 2005 - 2009
+OST phase II monitoring activities included a reduction in sampling stations from 41 stations to 38 stations and a shift in parameters from metals and toxins to bacteria, nutrients, and inorganicsinorganics, and stream health monitoring using macroinvertebrate metrics and habitat quality assessments (Matrix 2011).  Water quality samples are collected during three months with the highest annual precipitation, April, May and June, and four months with low precipitation, July, August, September, and October for water quality parameters reflecting parameters of concern based on criteria for beneficial uses.  
+
+Matrix Consulting (2011) analyzed physical and chemical parameters 2005-2009 for the White River/Wounded Knee Creek watershed.  Several water bodies were designated as "Threatened", water quality exceedances occurring in greater than 10% of cases when less than 10 samples were collected for fecal coliform, E. coli, and TSS.  Fecal coliform exceed water quality criteria at Wounded Knee Creek Station 1 (WOK1) with a 25% exceedances (1 of 4 samples), Wounded Knee Creek Station 3 (WOK3) with a 33% exceedance (1 of 3 samples), and Wounded Knee Creek Station 4 (WOK4) with a 50% exceedance (2 of 4 samples).  Escherichia coli (E. coli) exceeded water quality criteria at Wounded Knee Creek 2 (WOK2) with a 25% exceedance (1 of 4 samples), WOK3 with a 60% exceedance (3 of 5 samples), and WOK4 with a 100% exceedance (4 of 4 samples).  Total suspended solids (TSS) exceed water quality criteria at WOK4 with a 25% exceedance (1 of 4 samples).  No exceedances were found for Porcupine Creek monitoring stations during the sampling period.  
+
+Macroinvertebrate were incorporated into a NPS monitoring on the Pine Ridge Reservation in 1993. Stream health monitoring using benthic macroinvertebrate began in 1993.  Based on samples collected between 1993-1996, seven metric scoring criteria were chosen: Taxa Richness, EPT Index, % EPT, Family Biotic Index, % Dominant, Family, % Dipterans and Non-Insects, and % Collector-Gatherer.  To determine the relationship between habitat quality and biological condition, biosurvey and habitat data collected from April to November 1998 for 38 monitoring stations. 
+
+## 1.3.2 Discussion of Sampling Results between 1993 - 2005
+# Need Discussion
+
+The study identified biological conditions for the White River/Porcupine Creek watershed ranged from severely impaired (WOK1), to moderately impaired (WOK2, WOK3, POR1), to unimpaired (POR2, POR3) and overall habitat ratings ofwas rated sub-optimal.  The report concluded nutrient enrichment to be the primary cause of reduced biological integrity (Matrix 2011).
+
+## 1.3.4 Results of Sampling between 2008 - 2011
+
+This section presents the chemical data analysis for streams monitored between 2008-2011.  Physical data including pH, conductivity, temperature, and dissolved oxygen was collected as instantaneous measurements between 2008-2011, however these results will be published as part of individual watershed assessment reports beginning in 2014.  Water quality is an indicator of the general condition of the watershed and pollutant source types, locations, and behavior (USEPA 2010).  The process of conducting data analyses to characterize the watershed and its pollutant sources began with broad assessments evaluating the averages, minimums, and maximums of measured parameters at the monitoring sites (Matrix 2011). 
+Water quality data alone does not adequately characterize stream health (Shapiro 2008).  Reports commissioned in early 2000 to address questions from the US Congress on the condition of US waters found that the US lacked the data necessary to report the current status of its ecological resources, trends in these conditions, and causes of environmental degradation (Heintz 2002, USEPA 2003, Shapiro 2008).  The early 2000 reporting resulted in the development and application of standardized protocols focusing on biological indicators for sampling, processing and interpreting core indicators of biological condition and of key stressors (Barbour 1999, Shapiro 2008).  Stream health is defined as “a desirable and sustainable ecosystem structure and function, or ecosystem integrity” (Merritt 1986, Karr 1989).  Macroinvertebrate taxa are often used as an indicator of overall ecosystem integrity through a multi-metric approach that measure a wide range of gradients from individual health to landscape dynamics (Planfkin 1999).  Metrics incorporate taxa richness, dominance of taxa that are sensitive or insensitive to pollution, balance of functional feeding groups (Rosenberg and Resh 1993, Merritt 1986).  
+
+## 1.3.4 Discussion of Sampling between 2008 - 2011
+## 1.3.4 Conclusions from Sampling between 2008 - 2011
+
+## 1.4	Current 106/319 Program Monitoring Strategy 
+The current non-point source OST NPS monitoring program samples for conventional and non-conventional parameters of concern pollutants including: pathogens, total suspended solids, and nutrients.  However, the recent change in the sediment water quality standard for the White River has reduced the number of total suspended solids exceedances for Pine Ridge reservation streams. Parameters sampled during 2008 – 2013 for water quality were collected during three months with the highest annual precipitation, April, May and June, and four months with low precipitation, July, August, September, and October.  Additional parameters were sampled to better understand phosphorus sources and to develop a more complete understanding of the distribution of common inorganic ions in order to evaluate historical metals data.
+
+## 1.4.1 Sampling Strategy
+Samples collected by the OST Water Pollution Control Program were tested through Energy Labs in Rapid City, SD for chemical properties Energy Labs recorded samples with concentrations below the reporting limit as “Non-detect”.
+
+|    Physical Parameters      |      Conventional Pollutants       | 
+|----------------------------:|:----------------------------------:|
+|    stream flow              |	biochemical oxygen demand (BOD)    |
+|    pH                       |   (2 mg/L)                         |
+|	   temperature              |	total suspended solids (TSS)       |
+|	   conductivity             |   (10 mg/L)                        |
+|	   dissolved oxygen         |	fecal coliform bacteria            |
+|	   turbidity                |   (1 CFU 100 ml)                   |
+|                             | E-coli (1 CFU 100 ml)              |
+
+| Non-conventional pollutants |  Additional Parameters Sampled     |
+|----------------------------:|:----------------------------------:|
+|	ammonia-nitrogen (NH3)      | soluble reactive phosphorus (SRP)  |
+|   (0.05 mg/L)               |   (0.01 mg/L)                      |  
+|	nitrate-nitrogen (NO3)      | calcium   (1 mg/L)                 |
+|   (0.1 mg/L)                | magnesium (1 mg/L)                 |
+|	total phosphorus (TP)       | sodium    (1 mg/L)                 |
+|   (0.01 mg/L)               | potassium (1 mg/L)                 |
+|	hardness (1 mg/L)           | chloride  (1 mg/L)                 |          
+|                             | sulfate   (1 mg/L)                 |
+
+
+## 1.4.1 Benefitial Uses and Water Quality Parameters
+Benefitial uses for all Pine Ridge Reservation watersheds include: 1) wildlife propagation, recreation, and stock watering, 2) immersion recreation, 3) fish propagation, and 4) Spiritual uses.  
+
+The water quality criteria for wildlife propagation, recreation, and stock watering waters given in SD Legetative Rule 74:51:01:52 includes the following parameters:
+
+|                      |                           | Unit of |   Special  | 
+|     Parameter        |        Criteria           | Measure | Conditions | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+| Total alkalinity as  |         ≤ 750             |   mg/L  | 30-day avg | 
+|  calcium carbonate   |         ≤ 1,313           |   mg/L  |  daily max |  
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|   Total dissolved    |         ≤ 2,500           |   mg/L  | 30-day avg | 
+|       solids         |         ≤ 4,375           |   mg/L  |  daily max | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+| Conductivity at 25 C |          ≤ 4,000          | mohms/cm| 30-day avg | 
+|                      |          ≤ 7,000          |         |  daily max | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+|     Nitrate as N     |            ≤ 50           |   mg/L  | 30-day avg | 
+|                      |            ≤ 88           |   mg/L  |  daily max | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+|         pH           |      ≥ 6.5 - ≤ 9.0        |  units  | See §74:51:| 
+|                      |                           |         |      01:07 | 
+|---------------------:|:-------------------------:|:-------:|:----------:|    
+| Total Suspend. Solid |           ≤ 90            |   mg/L  | 30-day avg | 
+|                      |           ≥ 158           |   mg/L  | daily max  | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|   Total petroleum    |           ≤ 10            |   mg/L  | See §74:51:| 
+|     hydrocarbon      |           ≥ 158           |         |      01:10 | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|    Oil and grease    |           ≤ 10            |   mg/L  | See §74:51:| 
+|     hydrocarbon      |           ≥ 158           |   mg/L  |      01:10 | 
+
+
+
+
+
+|                             | Coldwater | Warmwater | Warmwater | 
+|     Waterbody      |  Site  |  Marginal | Permanant | Semi-Perm |
+|                    | number | Fish Life | Fish Life | Fish Life |
+|-------------------:|:------:|:---------:|:---------:|:---------:|
+| White Clay Creek   |  WCC1  |           |     X     |           |
+|                    |  WCC2  |           |     X     |           |
+|                    |  WCC3  |     X     |           |           |
+| Wolf Creek         |  WOL1  |           |     X     |           |
+| White River        |  WHR1  |           |     X     |           |
+|-------------------:|:------:|:---------:|:---------:|:---------:|
+| Wounded Knee Creek |  WOK1  |     X     |           |           |
+|                    |  WOK2  |           |     X     |           |
+|                    |  WOK3  |           |     X     |           |
+|                    |  WOK4  |           |     X     |           |
+| Porcupine Creek    |  POR1  |           |           |     X     |
+|                    |  POR2  |           |     X     |           |
+|                    |  POR2  |           |     X     |           |
+| White River        |  WHR2  |           |     X     |           |
+|-------------------:|:------:|:---------:|:---------:|:---------:|
+| American Horse Ck. |  AMH1  |           |     X     |           |
+| No Flesh Creek     |  NFL1  |           |     X     |           |
+| Red Water Creek    |  RED1  |           |     X     |           |
+| Medicine Root Ck.  |  MER1  |           |     X     |           |
+|                    |  MER3  |     X     |           |           |
+|                    |  MER4  |     X     |           |           |
+| White River        |  WHR3  |           |     X     |           |
+|-------------------:|:------:|:---------:|:---------:|:---------:|
+| Potato Creek       |  POT1  |           |     X     |           |
+| Lost Dog Creek     |  LOD1  |           |     X     |           |
+| Corn Creek	       |  COR1  |           |     X     |           |
+| Bear Creek	       |  BEA1  |           |     X     |           |
+|                    |  BEA2  |           |     X     |           |
+|	                   |  BEA3  |           |     X     |           |
+| Bear-in-the-Lodge  |  BLC1  |           |     X     |           |
+|   Creek            |  BLC2  |           |     X     |           |
+| Eagle Nest Creek	 |  EAN1  |           |     X     |           |
+|	                   |  EAN2  |           |     X     |           |
+| White River        |  WHR5  |           |     X     |           |
+|-------------------:|:------:|:---------:|:---------:|:---------:|
+| Craven Creek       |  CRA1  |           |     X     |           |
+| Long Creek         |  LON1  |           |     X     |           |
+| Buzzard Creek      |  BUZ1  |           |     X     |           |
+| Pass Creek         |  PAS1  |           |     X     |           |
+|                    |  PAS2  |           |     X     |           |
+|                    |  PAS2  |           |     X     |           |
+| Black Pipe Creek   |  BLP1  |           |     X     |           |
+| White River        |  WHR5  |           |     X     |           |
+|-------------------:|:------:|:---------:|:---------:|:---------:|
+| Little White River |  LWR1  |           |     X     |           |
+|                    |  LWR1  |           |     X     |           |
+|                    |  LWR1  |           |     X     |           |
+|                    |  LWR1  |           |     X     |           |
+
+The water quality limits for fish life propagation given in South Dakota Legislative Rule 74:51:01:47 are summarized in the table below, with temperature as the single water quality criterion that differs among coldwater marginal (≤ 75 deg. F), warmwater permanant (≤ 80 deg. F), and warmwater semi-permanant (≤ 90 deg. F) fish life propogation criteria.
+
+|                      |                           | Unit of |   Special  | 
+|     Parameter        |        Criteria           | Measure | Conditions | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|                      | Equal to or less than the |         | 30-day avg | 
+|                      | result from Equation 3 in |   mg/L  |   Mar 1 -  | 
+|                      | 74:51:01 Appendix A       |         |   Oct 31   | 
+|                      |:-------------------------:|:-------:|:----------:|           
+|                      | Equal to or less than the |         | 30-day avg | 
+| Total Ammonia as N   | result from Equation 4 in |   mg/L  |   Nov 1 -  | 
+|                      | 74:51:01 Appendix A       |         |   Feb 29   | 
+|                      |:-------------------------:|:-------:|:----------:|       
+|                      | Equal to or less than the |         |            | 
+|                      | result from Equation 3 in |   mg/L  |   Daily    | 
+|                      | 74:51:01 Appendix A       |         |   Maximum  | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+|   Dissolved oxygen   |          ≥ 5.0            |   mg/L  |            | 
+|---------------------:|:-------------------------:|:-------:|:----------:|           
+|    Undissociated     |                           |         |            | 
+|   Hydrogen Sulfide   |         ≤ 0.002           |   mg/L  |            | 
+|---------------------:|:-------------------------:|:-------:|:----------:|           
+|         pH           |      ≥ 6.5 - ≤ 9.0        |  units  |            | 
+|---------------------:|:-------------------------:|:-------:|:----------:|    
+| Total Suspend. Solid |           ≤  90           |   mg/L  | 30-day avg | 
+|                      |           ≥ 158           |   mg/L  | daily max  | 
+|---------------------:|:-------------------------:|:-------:|:----------:|  
+
+
+
+```{r library}
+# https://pakillo.github.io/R-GIS-tutorial/
+library(ggmap)       # comes with a nice theme_nothing() function
+library(tidyverse)  # loads ggplot2, tibble, tidyr, readr, purrr, dplyr
+library(janitor)     # quick tools for cleaning up var names
+library(broom)
+library(lubridate)
+library(gridExtra)
+# library(knitr)       # lightweight table package
+# library(xtable)      # God let this one be the table package that works...
+# library(gridExtra)   # miscellaneous functions for "Grid" graphics
+# library(lubridate)   # makes dealing with dates a little easier
+
+
+# library(sp)         # classes for spatial data
+# library(raster)     # grids, rasters
+# library(rasterVis)  # raster visualisation
+# library(maptools)   # Tools for Reading and Handling Spatial Objects 
+# library(rgeos)      # Interface to Geometry Engine - Open Source
+
+# library(scales)    # tells ggplot what the proper scale should be
+# library(RgoogleMaps) # Overlays on Static Maps
+# library(rgdal)       # reads in shape files
+# library(tmap)        # thematic map visualization
+# library(Cairo) creates high quality vector and bitmap images
+
+# some other packages that work well and might be useful are:
+# haven,forcats, httr, hms, jsonlite, lubridate, magrittr, 
+# modelr, readxl, stringr, rvest,  xml2
+```
+
+```{r load.data}
+# The xlsx file "Chemistry-1993-2013_17Mar21" was converted to a csv.
+# load data
+
+raw <- read_csv("~/Google Drive/R-files-consolidated/BearLodge/Data/Chemistry-1993-2013_17Mar21.csv", 
+    col_types = cols(Hg = col_character()))
+
+# tidy up the data with dplyr & standardize var names with janitor  
+# clean names, remove empty columns and rows
+raw <- raw %>%
+  clean_names() %>%
+  remove_empty_cols() %>%
+  filter(!is.na(sample_sites)) %>% 
+  rename(sort = x_sort) %>%
+  mutate(sample_sites = as.factor(sample_sites))
+
+# add short names; need to use two steps to avoid an overflow error
+raw1 <- raw %>%
+  mutate(samp_site = 
+    if_else(sample_sites == "American Horse I", "AMH1", 
+    if_else(sample_sites == "Bear Creek I", "BEA1",
+    if_else(sample_sites == "Bear Creek II", "BEA2",    
+    if_else(sample_sites == "Bear Creek III", "BEA3",
+    if_else(sample_sites == "Bear in the Lodge I", "BEL1",
+    if_else(sample_sites == "Bear in the Lodge II", "BEL2",
+    if_else(sample_sites == "Bear in the Lodge USGS1", "BEL_USGS",
+    if_else(sample_sites == "Bear in the Lodge USGS2", "BEL_USGS",
+    if_else(sample_sites == "Bear in the Lodge USGS3", "BEL_USGS",
+    if_else(sample_sites == "Black Pipe I", "BLP1",
+    if_else(sample_sites == "Black Pipe II", "BLP2",
+    if_else(sample_sites == "Buzzard Creek I", "BUZ1",       
+    if_else(sample_sites == "Cheyenne River I", "CHR1",
+    if_else(sample_sites == "Cheyenne River II", "CHR2",
+    if_else(sample_sites == "Corn Creek I", "COR1",      
+    if_else(sample_sites == "Craven Creek I", "CRA1",
+    if_else(sample_sites == "Eagle Nest I", "EAN1",
+    if_else(sample_sites == "Eagle Nest II", "EAN2",
+    if_else(sample_sites == "Little Corn Creek I", "LCC1",
+    if_else(sample_sites == "Little White River I", "LWR1",
+    if_else(sample_sites == "Little White River II", "LWR2",
+    if_else(sample_sites == "Little White River III", "LWR3",
+    if_else(sample_sites == "Little White River IV", "LWR4",
+    if_else(sample_sites == "Long Creek I", "LON1",
+    if_else(sample_sites == "Lost Dog Creek I", "LOD1",
+    if_else(sample_sites == "Medicine Root I", "MER1",
+    if_else(sample_sites == "Medicine Root II", "MER2",      
+    if_else(sample_sites == "Medicine Root III", "MER3",
+    if_else(sample_sites == "Medicine Root IV", "MER4",
+    if_else(sample_sites == "No Flesh Creek I", "NFL1",
+    if_else(sample_sites == "Pass Creek I", "PAS1",
+    if_else(sample_sites == "Pass Creek II", "PAS2",      
+    if_else(sample_sites == "Pass Creek III", "PAS3",
+    if_else(sample_sites == "Pass Creek IV", "PAS4",
+    if_else(sample_sites == "Porcupine Creek I", "POR1", 
+           "stuff" , missing = NULL))))))))))))))))))))))))))))))))))))
+   
+# split into two pieces
+raw2 <- raw1 %>%
+  filter(samp_site == "stuff")
+raw1 <- raw1 %>%
+  filter(samp_site != "stuff")
+
+# add short names for the other half
+raw2 <- raw2 %>%
+ mutate(samp_site = if_else(sample_sites == "Porcupine Creek II", "POR2",
+    if_else(sample_sites == "Porcupine Creek III", "POR3",
+    if_else(sample_sites == "Porcupine Lagoon upstream", "POR_Lagoon",
+    if_else(sample_sites == "Porcupine Lagoon downstream", "POR_Lagoon",
+    if_else(sample_sites == "Pine Ridge Lift Station Downstream", "WCC_Lagoon",
+    if_else(sample_sites == "Potato Creek", "POT1",
+    if_else(sample_sites == "Red Water Creek", "RED1",
+    if_else(sample_sites == "White Clay Creek I", "WCC1", 
+    if_else(sample_sites == "White Clay Creek II", "WCC2",
+    if_else(sample_sites == "White Clay Creek III", "WCC3",
+    if_else(sample_sites == "Wolf Creek I", "WOL1",
+    if_else(sample_sites == "White River I", "WHR1",
+    if_else(sample_sites == "White River II", "WHR2",      
+    if_else(sample_sites == "White River III", "WHR3",
+    if_else(sample_sites == "White River IV", "WHR4",
+    if_else(sample_sites == "White River V", "WHR5",
+    if_else(sample_sites == "Wounded Knee I", "WOK1",
+    if_else(sample_sites == "Wounded Knee II", "WOK2",
+    if_else(sample_sites == "Wounded Knee III", "WOK3",
+    if_else(sample_sites == "Wounded Knee IV", "WOK4",
+    if_else(sample_sites == "Wounded Knee Lagoon (downstream)", "WOK_Lagoon", 
+            "other", missing = NULL))))))))))))))))))))))
+
+# bind the two parts together
+raw <- bind_rows(raw1, raw2)
+rm(raw1, raw2)
+
+# add subwatersheds
+raw <- raw %>%
+ mutate(subws = 
+   if_else(samp_site == "WCC1" | samp_site == "WCC2" |
+     samp_site == "WCC3" | samp_site == "WOL1" |
+     samp_site == "WHR1" | samp_site == "WCC_Lagoon", 
+     "WhU",
+       if_else(samp_site == "POR1" | samp_site == "POR2" |
+         samp_site == "POR3" | samp_site == "POR_Lagoon" | 
+         samp_site == "WOK1" | samp_site == "WOK2" |
+         samp_site == "WOK3" | samp_site == "WOK4" |
+         samp_site == "WOK_Lagoon" | samp_site == "WHR2",
+         "WhW", 
+            if_else(samp_site =="AMH1" | samp_site == "RED1" |
+              samp_site == "MER1" | samp_site == "MER2" |
+              samp_site == "MER3" | samp_site == "MER4" |
+              samp_site == "NFL1" | samp_site == "WHR3",
+              "WhM",
+                 if_else(samp_site == "BEA1" | samp_site == "BEA2" |
+                    samp_site == "BEA3" | samp_site == "BEL1" |
+                    samp_site == "BEL2" | samp_site == "BEL_USGS" |
+                    samp_site == "LOD1" | samp_site == "COR1" |
+                    samp_site == "EAN1" | samp_site == "EAN2" | 
+                    samp_site == "WHR5" | samp_site == "POT1" |
+                    samp_site == "LON1" | samp_site == "CRA1" |
+                    samp_site == "BUZ1" | samp_site == "RED1",
+                    "WhB", 
+                       if_else(samp_site == "LCC1" | samp_site == "WHR4" |
+                         samp_site == "PAS1" | samp_site == "PAS2" |
+                         samp_site == "PAS3" | samp_site == "PAS4" |
+                         samp_site == "BLP1" | samp_site == "BLP2",
+                         "WhP", 
+                            if_else(samp_site == "CHR1" |
+                                    samp_site == "CHR2", "ChR", 
+                                    "LWR" ))))))) 
+
+# add ecoregions
+raw <- raw %>%
+ mutate(ecoregion = 
+   if_else(samp_site == "WCC1" | samp_site == "WCC2" |
+           samp_site == "POR1" | samp_site == "POR2" |
+           samp_site == "WOK2" | samp_site == "WOK3" | 
+           samp_site == "AMH1" | samp_site == "RED1" |
+           samp_site == "MER1" | samp_site == "MER2" |
+           samp_site == "MER3" | samp_site == "NFL1" |
+           samp_site == "BEA1" | samp_site == "BEA2" |
+           samp_site == "BEA3" | samp_site == "BEL1" |   
+           samp_site == "LOD1" | samp_site == "COR1" |
+           samp_site == "EAN1" | samp_site == "POT1" |
+           samp_site == "LON1" | samp_site == "CRA1" |
+           samp_site == "BUZ1" | samp_site == "RED1" |
+           samp_site == "LCC1" | samp_site == "BLP1" |
+           samp_site == "PAS1" | samp_site == "PAS2" |
+           samp_site == "BLP2" | samp_site == "WHR1",
+           "TabLand", 
+           if_else(samp_site == "WCC3" | samp_site == "POR3" |
+                   samp_site == "WOK4" | samp_site == "MER4" |
+                   samp_site == "BEL2" | samp_site == "PAS3" |
+                   samp_site == "WHR2" | samp_site == "WHR3" |
+                   samp_site == "WHR4" | samp_site == "WHR5" |
+                   samp_site == "EAN2", "BadLand",
+                   if_else(samp_site == "CHR1" | samp_site == "CHR2",
+                           "CheyRiv", 
+                           if_else(samp_site == "WCC_Lagoon" |
+                                   samp_site == "POR_Lagoon" |
+                                   samp_site == "WOK_Lagoon" |
+                                   samp_site == "BEL_USGS", "other",
+                                   "LWR")))))
+```
+
+
+```{r munge.data}
+cleaned <- raw %>%
+  mutate(flow_cfs = as.factor(flow_cfs)) %>%
+  mutate(high_low = as.factor(high_low)) %>%
+  mutate(notes = as.factor(notes)) %>%
+  mutate(date = mdy(date)) %>%
+  mutate(time = hm(time)) %>%
+  mutate(depth_ft = as.numeric(depth_ft)) %>%
+  mutate(width_ft = as.numeric(width_ft)) %>%
+  mutate(high_low = as.factor(high_low)) %>%
+  mutate(cond = if_else(cond == "error", "NA", cond)) %>%
+  mutate(cond = as.numeric(cond)) %>%
+  mutate(do = if_else(do == "error", "NA", do)) %>%
+  mutate(do = as.numeric(do)) %>%
+  mutate(turb = if_else(turb == "nd", "NA", turb)) %>%
+  mutate(turb = as.numeric(turb)) %>%
+  mutate(nh3 = if_else(nh3 == "nd", "0.025", nh3)) %>%
+  mutate(nh3 = as.numeric(nh3)) %>%
+  mutate(mg = if_else(mg == "nd", "0.5", mg)) %>%
+  mutate(mg = as.numeric(mg)) %>%
+  mutate(alk = as.numeric(alk)) %>%
+  rename(cl = ci) %>%
+  rename(f = fi) %>%
+  rename(so4 = s) %>%
+  mutate(so4 = as.numeric(so4)) %>%
+  mutate(nate = if_else(nate == "nd", "0.05", nate)) %>%
+  mutate(nate = as.numeric(nate)) %>%
+  mutate(op = if_else(op == "nd", "0.005", op)) %>%
+  mutate(op = as.numeric(op)) %>%
+  mutate(tp = if_else(tp == "nd", "0.005", tp)) %>%
+  mutate(tp = as.numeric(tp)) %>%
+  mutate(as = if_else(as == "<0.005", "0.0025", as)) %>%
+  mutate(as = as.numeric(as)) %>%
+  mutate(as = if_else(as < 0.05, 0.025, as)) %>%
+  mutate(cu = if_else(cu == "<0.005", "0.0025", cu)) %>%
+  mutate(cu = as.numeric(cu)) %>%
+  mutate(cu = if_else(cu < 0.05, 0.025, cu)) %>%
+  mutate(pb = if_else(pb == "nd", "<0.005", pb)) %>%
+  mutate(pb = if_else(pb == "<0.005", "0.0025", pb)) %>%
+  mutate(pb = as.numeric(pb)) %>%
+  mutate(pb = if_else(pb < 0.05, 0.025, pb)) %>%
+  mutate(hg = if_else(hg == "nd", "0", hg)) %>%
+  mutate(hg = as.numeric(hg)) %>%
+  mutate(hg = if_else(hg == 0, 0.00005, hg)) %>%
+  mutate(se = if_else(se == "<.002", "0", se)) %>%
+  mutate(se = as.numeric(se)) %>%
+  mutate(se = if_else(se == 0, 0.001, se)) %>%
+  mutate(ag = if_else(ag == "<0.005", "0.0025", ag)) %>%
+  mutate(ag = as.numeric(ag)) %>%
+  mutate(ag = if_else(ag < 0.05, 0.0025, ag))%>%
+  mutate(e_coli = if_else(e_coli == ">2419.6" |
+                            e_coli == ">4839.2" |
+                            e_coli == ">24196.0"|
+                            e_coli == ">9678.4",
+                            "NA",e_coli)) %>%
+  mutate(e_coli = as.numeric(e_coli)) %>%
+  mutate(total_coli = if_else(total_coli == ">2419.6" |
+                            total_coli == ">1419.6" |  
+                            total_coli == ">4839.2" |
+                            total_coli == ">24196.0"|
+                            total_coli == ">4339.2" |  
+                            total_coli == "<241960."|
+                            total_coli == "<4839.2" |  
+                            total_coli == ">9678.4",
+                           "NA",total_coli)) %>%
+  mutate(total_coli = as.numeric(total_coli)) %>%
+  mutate(fecal_coli = as.numeric(fecal_coli)) %>%
+  mutate(bod = if_else(bod == "<12", "12",
+                   if_else(bod == "<2", "2",    
+                       if_else(bod == "<3", "3",
+                           if_else(bod == "<4", "4",
+                               if_else(bod == "<6", "6",    
+                                   if_else(bod == ">3", "3", 
+                                       if_else(bod == "nd", "1", bod
+                                               )))))))) %>%
+  mutate(bod = as.numeric(bod)) %>%
+  mutate(tss = if_else(tss == "nd", "5", tss)) %>%
+  mutate(tss = as.numeric(tss)) %>%
+  mutate(samp_site = as.factor(samp_site)) %>%
+  mutate(subws = factor(subws, levels = c("ChR","WhU","WhW","WhM","WhB","WhP","LWR"))) %>%
+  arrange(subws) %>%
+  mutate(phase = if_else(year > 2004, "Phase II", "Phase I"))%>%
+  mutate(phase = as.factor(phase)) %>%
+  filter(!is.na(year)) %>%
+  mutate(month = month(date)) %>%
+  mutate(fish_life = as.factor(if_else(samp_site =="WCC3" |
+              samp_site == "WOK1" | samp_site == "MER3" |
+                samp_site == "MER4", "Coldwater Marginal",
+                if_else(samp_site =="POR1", "Warmwater Semi-Perm",
+                        "Warmwater Permanant")))) %>%
+  mutate(temp_lim = if_else(fish_life == "Coldwater Marginal", 75,
+                if_else(fish_life =="Warmwater Semi-Perm", 90, 80))) 
+  
+## Warnings:: NAs introduced by coercion: "NA"
+phase2 <- cleaned %>%
+  filter(year > 2007) %>%
+   mutate(year = as.factor(year))
+
+```
+
+# 2.0 Data and Results
+This report focuses on analysis of samples collected for Bear in the Lodge and Pass Creek subwatersheds in 2012 - 2013.  However, data for samples collected between 2008 to 2013 are provided for context for water quality parameters sampled in 2012-2013 and data for samples collected prior to 2008 are provided for water parameters not sampled in 2012-2013.  
+
+|    Subwatershed      | 2008 | 2009 | 2010 | 2011 | 2012 | 2013 |
+|---------------------:|:----:|:----:|:----:|:----:|:----:|:----:|
+| Cheyenne River       |      |      |      |      |      |      |
+|     (ChR)            |      |  X   |      |  X   |      |      |
+| White River Upper    |      |      |      |      |      |      |
+|      (WhU)           |      |  X   |      |  X   |      |      |
+| White River Wounded  |      |      |      |      |      |      |
+|   Knee (WhW)         |  X   |      |      |  X   |      |      |
+| White River Medicine |      |      |      |      |      |      |
+|   Root (WhM)         |      |      |  X   |      |      |      |
+| White River Bear in  |      |      |      |      |      |      |
+|   the Lodge (WhB)    |  X   |      |  X   |      |  X   |  X   |
+| White River Pass     |      |      |      |      |      |      |
+|   Creek (WhP)        |      |  X   |      |      |  X   |  X   |
+| Little White River   |      |      |      |      |      |      |
+|    (LWR)             |      |      |  X   |      |      |      |
+
+
+## 2.1 Wildlife propagation, recreation, and stock watering waters
+The water quality parameters for the wildlife propagation, recreation, and stock watering waters benefitial use are shown in Table XX below. Historical results for total alkalinity are provided because the parameter was not sampled in 2012-2013.  Total dissolved solids were not measured, but may be estimated from the conductivity results. Total petroleum hydrocarbons and oil and grease hydrocarbons were not sampled.
+
+### Table XX: Parameters for wildlife propagation, recreation, and stock watering waters benefitial use  
+
+|                      |                           | Unit of |   Special  | 
+|     Parameter        |        Criteria           | Measure | Conditions | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+| Total alkalinity as  |         ≤ 750             |   mg/L  | 30-day avg | 
+|  calcium carbonate   |         ≤ 1,313           |   mg/L  |  daily max |  
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|   Total dissolved    |         ≤ 2,500           |   mg/L  | 30-day avg | 
+|       solids         |         ≤ 4,375           |   mg/L  |  daily max | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+| Conductivity at 25 C |          ≤ 4,000          | mohms/cm| 30-day avg | 
+|                      |          ≤ 7,000          |         |  daily max | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+|     Nitrate as N     |            ≤ 50           |   mg/L  | 30-day avg | 
+|                      |            ≤ 88           |   mg/L  |  daily max | 
+|---------------------:|:-------------------------:|:-------:|:----------:|      
+|         pH           |      ≥ 6.5 - ≤ 9.0        |  units  | See §74:51:| 
+|                      |                           |         |      01:07 | 
+|---------------------:|:-------------------------:|:-------:|:----------:|    
+| Total Suspend. Solid |           ≤ 90            |   mg/L  | 30-day avg | 
+|                      |           ≥ 158           |   mg/L  | daily max  | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|   Total petroleum    |           ≤ 10            |   mg/L  | See §74:51:| 
+|     hydrocarbon      |           ≥ 158           |         |      01:10 | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|    Oil and grease    |           ≤ 10            |   mg/L  | See §74:51:| 
+|     hydrocarbon      |           ≥ 158           |   mg/L  |      01:10 | 
+
+```{r alkalinity.conductivity}
+cleaned$year <- as.factor(cleaned$year)
+
+p1 <- ggplot(cleaned, aes(subws,alk)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 750) +
+  geom_hline(yintercept = 1313) +
+  labs(title = "Total Alkalinity as CaCO3",
+       subtitle = "Samples from 1993 - 2005",
+       y = "Alkalinity [mg/L as CaCO3]",
+       x = "Subwatershed")
+
+p2 <- ggplot(phase2, aes(subws,cond)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+    geom_hline(yintercept = 4000) +
+  geom_hline(yintercept = 7000) +
+  labs(title = "Conductivity",
+       y = "Conductivity [uMho/L at 25 C]",
+       x = "Subwatershed")
+grid.arrange(p1,p2, nrow = 2)
+```
+
+
+```{r Nate.pH}
+ph.fail <- phase2 %>%
+ filter(ph < 6.5 | ph > 9)
+
+p1 <- ggplot(phase2, aes(subws,nate)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+ geom_hline(yintercept = 50) +
+  geom_hline(yintercept = 88) +
+   labs(title = "Nitrate as N",
+       y = "Nitrate [mg/L]",
+       x = "Subwatershed")
+
+p2 <- ggplot(phase2, aes(year,ph)) +
+  geom_boxplot() + 
+  theme_classic() +
+  geom_hline(yintercept = 6.5) +
+  geom_hline(yintercept = 9) +
+  labs(y = "pH [units]",
+       x = "Subwatershed")
+
+grid.arrange(p1, p2, nrow=2)
+```
+
+
+```{r tss}
+tss.fail <- phase2 %>%
+  filter(tss > 158)
+
+p1 <- ggplot(phase2, aes(subws,tss)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 90) +
+  geom_hline(yintercept = 158) +
+  labs(title = "Total Suspended Solids by Subwatershed",
+       subtitle = "2008-2013",
+       y = "TSS [mg/L]",
+       x = "Subwatershed")
+
+p2 <- ggplot(phase2, aes(ecoregion,tss)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 90) +
+  geom_hline(yintercept = 158) +
+  labs(subtitle= "Bear in the Lodge and Pass Creek subwatersheds, 2012-2013",
+       y = "TSS [mg/L]",
+       x = "Ecoregion")
+
+grid.arrange(p1, p2, nrow=2)
+```
+
+## 2.2 Immersion recreation waters
+Water quality parameters for the immersion recreation benefitial use as given in SD Legetative Rule 74:51:01:50 are shown in Table XX below. Fecal coliform and Escherichia coli average monthly limits are based on a geometric mean of a minimum of five samples obtained during separate 24-hour periods for an 30-day period, and they may not exceed this value in more than 20% of the samples examined in this same 30-day period.  The total suspended solids parameter is plotted above.
+
+### Table XX: The water quality criteria for immersion recreation waters 
+
+|                      |                           | Unit of |   Special  | 
+|     Parameter        |        Criteria           | Measure | Conditions | 
+|---------------------:|:-------------------------:|:-------:|:----------:| 
+|   Dissolved oxygen   |          ≥ 5.0            |   mg/L  | daily min  | 
+|---------------------:|:-------------------------:|:-------:|:----------:|           
+|    Fecal Coliform    |          ≤ 400            |  /100mL | one sample | 
+|                      |          ≤ 200            |  /100mL | see above  | 
+|---------------------:|:-------------------------:|:-------:|:----------:|           
+|   Escherichia coli   |          ≤ 235            |  /100mL | one sample | 
+|                      |          ≤ 126            |  /100mL | see above  | 
+|---------------------:|:-------------------------:|:-------:|:----------:|    
+| Total Suspend. Solid |          ≤  90            |   mg/L  | 30-day avg | 
+|                      |          ≥ 158            |   mg/L  | daily max  | 
+|---------------------:|:-------------------------:|:-------:|:----------:|   
+
+```{r bacteria}
+ecoli.fail <- phase2 %>%
+  filter(e > 158)
+
+p1 <- ggplot(phase2, aes(subws,tss)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 90) +
+  geom_hline(yintercept = 158) +
+  labs(title = "Total Suspended Solids by Subwatershed",
+       subtitle = "2008-2013",
+       y = "TSS [mg/L]",
+       x = "Subwatershed")
+
+p2 <- ggplot(phase2, aes(ecoregion,tss)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 90) +
+  geom_hline(yintercept = 158) +
+  labs(subtitle= "Bear in the Lodge and Pass Creek subwatersheds, 2012-2013",
+       y = "TSS [mg/L]",
+       x = "Ecoregion")
+
+grid.arrange(p1, p2, nrow=2)
+```
+
+
+
+
+
+```{r temperature}
+temp.fail <- phase2 %>%
+ filter(temp_f > 75 & temp_lim == 75 |
+        temp_f > 79.9 & temp_lim > 75 |
+          flow_cfs =="dry") 
+
+ggplot(phase2, aes(subws,temp_f)) +
+  geom_boxplot() + 
+  theme_classic() +
+  facet_grid(.~fish_life) + 
+  geom_hline(aes(yintercept = temp_lim), phase2)
+```
+
+
+
+```{r do}
+ggplot(phase2, aes(subws,do)) +
+  geom_boxplot() + 
+  theme_classic() +
+  geom_hline(yintercept = 5) +
+  geom_hline(yintercept = 10) 
+```
+
+
+
+```{r turbidity}
+ggplot(phase2, aes(subws,turb)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() 
+```
+
+
+```{r}
+# filter out the crazy-big turbidity & tss vals
+phase2.cen <- phase2 %>%
+  filter(is.na(turb) | turb < 200) %>%
+  filter(is.na(tss)  | tss < 10000)
+
+ggplot(phase2.cen, aes(turb, tss)) +
+  geom_point() + 
+  geom_smooth(method = "loess") +
+  theme_classic() +
+  scale_y_log10()
+```
+
+
+      Conventional Pollutants       | 
+
+|	              |   (10 mg/L)                        |
+|	           |	fecal coliform bacteria            |
+|	             |   (1 CFU 100 ml)                   |
+|                             | E-coli (1 CFU 100 ml)              |
+
+```{r bod}
+ggplot(phase2, aes(subws, bod)) +
+  geom_boxplot() + 
+  geom_hline(yintercept = 30) +
+  theme_classic()
+```
+
+```{r e_coli}
+# need to add in ecoregion vals
+p1 <- ggplot(phase2, aes(subws,e_coli)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 235)
+
+p2 <- ggplot(phase2, aes(subws,fecal_coli)) +
+  geom_boxplot() + 
+  theme_classic() +
+  scale_y_log10() +
+  geom_hline(yintercept = 400)
+
+grid.arrange(p1,p2, nrow = 2)
+```
