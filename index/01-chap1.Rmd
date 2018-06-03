@@ -5,6 +5,7 @@ Download station data
   DL metadata completed
   DL station precip obs completed
   Voroni diagrams completed - final selection of sites
+  Created a single flat-file of sites
 
 Next steps:
   Data cleaning - use Data Exploror 
@@ -40,20 +41,16 @@ library("here") # identifies where to save work
 library("rio") # more robust I/O - to import and clean data
 library("janitor") # tools for examining and cleaning dirty data
 library("DataExplorer")
-library("rnoaa") #  R wrapper for NOAA data including 
-#                   National Climatic Data Center (NCDC)
-library(lubridate)
+library("rnoaa") #  R wrapper for NOAA data inc. NCDC
+library("lubridate")
 
 
 # library("dataRetrieval") # USGS data import
 # library("RColorBrewer") - there is a better one?
 # library("workflowr") # creates a research website
 # library("colorspace")
-# Packages that are not likely to be called
-# library("DiagrammeR") # used to call 'mermaid' for a Gantt chart
-# library("thesisdown") # used to knit a thesis follows bookdown
-# library("bookdown") # 
 
+# library("bookdown") # 
 # library(unpivotr) # fix nasty Excel files
 # library("friendlyeval")
 
@@ -134,103 +131,110 @@ export(sta_kad, file = "data/sta_kad.csv")
 
 ```{r merge-precip-data, eval = FALSE}
 
+# load metadata
+sta_meta <- import("data/sta_meta_fin.csv")
+
 # these were downloaded from NOAA on 2018-06-01
-sta_hot <- import(file = "data/sta_hot.csv")
-sta_oel <- import(file = "data/sta_oel.csv")
-sta_int <- import(file = "data/sta_int.csv")
-sta_cot <- import(file = "data/sta_cot.csv")
-sta_lon <- import(file = "data/sta_lon.csv")
-sta_har <- import(file = "data/sta_har.csv")
-sta_ain <- import(file = "data/sta_ain.csv")
-sta_mur <- import(file = "data/sta_mur.csv")
-sta_mis <- import(file = "data/sta_mis.csv")
-sta_ora <- import(file = "data/sta_ora.csv")
-sta_kad <- import(file = "data/sta_kad.csv")
-sta_rap <- import(file = "data/sta_rap.csv") # kind of messed up!
-# sta_her <- import(file = "data/sta_her.csv") n = 304 obs so drop
+
+#   dropped in the subsequent analysis
+# sta_her <- import(file = "data/sta_her.csv") # n = 304 obs so drop
+# sta_hot <- import(file = "data/sta_hot.csv") # dropped by Theissen
+# sta_lon <- import(file = "data/sta_lon.csv") # dropped by Theissen
+# sta_har <- import(file = "data/sta_har.csv") # dropped by Theissen
+# sta_ain <- import(file = "data/sta_ain.csv") # dropped by Theissen
+# sta_mur <- import(file = "data/sta_mur.csv") # dropped by Theissen
+# sta_kad <- import(file = "data/sta_kad.csv") # dropped by Theissen
+
+# import prior saved files
+sta_oel <- import(file = "data/sta_oel.csv") #
+sta_int <- import(file = "data/sta_int.csv") #
+sta_cot <- import(file = "data/sta_cot.csv") #
+sta_mis <- import(file = "data/sta_mis.csv") #
+sta_ora <- import(file = "data/sta_ora.csv") #
+sta_rap <- import(file = "data/sta_rap.csv") # needs fixed & saved
 
 # join tables and rename prcp cols - data is in mm
-merge_sta1 <- full_join(sta_hot, sta_oel, by = "date")
+merge_sta1 <- full_join(sta_oel, sta_int, by = "date")
 merge_sta1 <- merge_sta1 %>%
   rename(hot = prcp.x) %>%
   rename(orl = prcp.y) 
 
-merge_sta2 <- full_join(merge_sta1, sta_int, by = "date")
+merge_sta2 <- full_join(merge_sta1, sta_cot, by = "date")
 merge_sta2 <- merge_sta2 %>%
-  rename(int = prcp)
-
-merge_sta3 <- full_join(merge_sta2, sta_cot, by = "date")
-merge_sta3 <- merge_sta3 %>%
   rename(cot = prcp)
 
-merge_sta4 <- full_join(merge_sta3, sta_lon, by = "date")
-merge_sta4 <- merge_sta4 %>%
-  rename(lon = prcp)
-
-merge_sta5 <- full_join(merge_sta4, sta_har, by = "date")
-merge_sta5 <- merge_sta5 %>%
-  rename(har = prcp)
-
-merge_sta6 <- full_join(merge_sta5, sta_ain, by = "date")
-merge_sta6 <- merge_sta6 %>%
-  rename(ain = prcp)
-
-merge_sta7 <- full_join(merge_sta6, sta_mur, by = "date")
-merge_sta7 <- merge_sta7 %>%
-  rename(mur = prcp)
-
-merge_sta8 <- full_join(merge_sta7, sta_mis, by = "date")
-merge_sta8 <- merge_sta8 %>%
+merge_sta3 <- full_join(merge_sta2, sta_mis, by = "date")
+merge_sta3 <- merge_sta3 %>%
   rename(mis = prcp)
 
-merge_sta9 <- full_join(merge_sta8, sta_ora, by = "date")
-merge_sta9 <- merge_sta9 %>%
+merge_sta4 <- full_join(merge_sta3, sta_ora, by = "date")
+merge_sta4 <- merge_sta4 %>%
   rename(ora = prcp)
 
-merge_staA <- full_join(merge_sta9, sta_kad, by = "date")
-merge_staA <- merge_staA %>%
-  rename(kad = prcp)
 
-# fix stations for final merge
-sta_rap <- sta_rap %>%
-  mutate(date = ymd(date))
-
-merge_staA <- merge_staA %>%
-  mutate(date = ymd(date))
-
-sta <- full_join(merge_staA, sta_rap, by = "date")
+# full-join and arrange
+sta <- full_join(merge_sta4, sta_rap, by = "date")
 sta <- sta %>%
   select(-starts_with("id")) %>%
-  rename(rap = prcp) %>%
-  arrange(desc(date))
+  rename(rap = prcp)  %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) 
 
 export(sta, file = "data/stations.csv")
+
+# Drop these in the future
+# merge_staA <- full_join(merge_sta9, sta_kad, by = "date")
+#merge_staA <- merge_staA %>%
+#  rename(kad = prcp)
+
+#merge_sta2 <- full_join(merge_oel, sta_int, by = "date")
+#merge_sta2 <- merge_sta2 %>%
+#  rename(int = prcp)
+
+#merge_sta4 <- full_join(merge_sta3, sta_lon, by = "date")
+#merge_sta4 <- merge_sta4 %>%
+#  rename(lon = prcp)
+
+#merge_sta5 <- full_join(merge_sta4, sta_har, by = "date")
+#merge_sta5 <- merge_sta5 %>%
+#  rename(har = prcp)
+
+#merge_sta6 <- full_join(merge_sta5, sta_ain, by = "date")
+#merge_sta6 <- merge_sta6 %>%
+#  rename(ain = prcp)
+
+#merge_sta7 <- full_join(merge_sta6, sta_mur, by = "date")
+#merge_sta7 <- merge_sta7 %>%
+#  rename(mur = prcp)
 ```
 
+```{r munge-precip-data,}
 
-```{r import-precip-data,}
-
-# load metadata
-sta_meta <- import("data/station_meta2.csv")
+# load metadata & data
+sta_meta <- import("data/sta_meta_fin.csv")
 sta <- import("data/stations.csv")
 
-
-
-
-
-
-
-
-
-
-
-
-sta_kad <- import(file = "data/sta_kad.csv")
-
-# add year and month
-sta_kad <- sta_kad %>%
+# fix date & add year and month
+sta <- sta %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) 
   mutate(year = year(date)) %>%
-  mutate(month = month(date))
+  mutate(month = month(date)) %>%
+  select(date, year, month, everything())
+
+# remove NA in 2018 data
+sta_not_2018 <- sta %>%
+  filter(year != 2018)
+sta_2018_filt <- sta %>%
+  filter(year == 2018 & month != 6)
+sta <- bind_rows(sta_not_2018, sta_2018_filt)
+rm(sta_2018_filt, sta_not_2018)
+
+#introduce(final_data)
+# plot_missing(final_data)
+
+
+
 
 test <- sta_kad %>%
   group_by(year, month) %>%
@@ -240,11 +244,6 @@ temp %>%
   group_by(yr = year(date), mon = month(date)) %>% 
   summarise(mn_amt = mean(amount))
 
-
-
-
-
-
 # gather stations
 sta_gath <- sta %>%
   gather(key = "key", value = "prcp", -date, na.rm = FALSE)
@@ -253,9 +252,6 @@ sta_gath <- sta %>%
 sta_gath <- sta_gath %>%
   mutate(year = year(date)) %>%
   mutate(month = month(date))
-
-test <- sta_gath
-
 
 temp %>% 
   group_by(yr = year(date), mon = month(date)) %>% 
