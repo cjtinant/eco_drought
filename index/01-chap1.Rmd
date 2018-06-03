@@ -1,10 +1,312 @@
+
+<!--
+Milestones for Chapter 1.
+Download station data
+  DL metadata completed
+  DL station precip obs completed
+  Voroni diagrams completed - final selection of sites
+
+Next steps:
+  Data cleaning - use Data Exploror 
+  merge precip d.fs
+
+Identify Journal  
+Calculate SPI & SPE           
+Learn purrr::map()            
+Develop SDI function          
+Watershed delineation        
+RF clustering of ungaged sta.
+-->
+
+<!-- next steps
+update the maps to find the data file that moved under ~index
+push github
+fix thesis build
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Get API key (aka, token) at http://www.ncdc.noaa.gov/cdo-web/token
+# token for NOAA API tied to jtinant@olc.edu
+options(noaakey = "VpcuARumMpCfFyclKHPfvskEYnaiLJHD")
+# see 'rnoaa' for details
+```
+
+```{r library, include=FALSE, message=FALSE}
+# Sets up the library of packages 
+library("tidyverse")
+library("here") # identifies where to save work
+library("rio") # more robust I/O - to import and clean data
+library("janitor") # tools for examining and cleaning dirty data
+library("DataExplorer")
+library("rnoaa") #  R wrapper for NOAA data including 
+#                   National Climatic Data Center (NCDC)
+library(lubridate)
+
+
+# library("dataRetrieval") # USGS data import
+# library("RColorBrewer") - there is a better one?
+# library("workflowr") # creates a research website
+# library("colorspace")
+# Packages that are not likely to be called
+# library("DiagrammeR") # used to call 'mermaid' for a Gantt chart
+# library("thesisdown") # used to knit a thesis follows bookdown
+# library("bookdown") # 
+
+# library(unpivotr) # fix nasty Excel files
+# library("friendlyeval")
+```
+
+```{r download-precip, eval = FALSE}
+# DL Global Historical Climatology Network (GHCN) Daily Data 
+# Note: to flatten a list use: Reduce(rbind, list)
+
+# load metadata
+sta_meta <- import("data/station_meta2.csv")
+
+# make a table for manual import
+# sta <- as.tibble(select(station_meta, 1:2))
+
+# id                name                              
+# <chr>             <chr>                             
+# GHCND:USW00024090 RAPID CITY REGIONAL AIRPORT, SD US
+# GHCND:US1SDFR0001 HOT SPRINGS 0.5 SSW, SD US        
+# GHCND:USC00396212 OELRICHS, SD US                   
+# GHCND:USC00394184 INTERIOR 3 NE, SD US              
+# GHCND:USC00391972 COTTONWOOD 2 E, SD US             
+# GHCND:USC00394983 LONG VALLEY, SD US                
+# GHCND:USC00253615 HARRISON, NE US                   
+# GHCND:USC00250050 AINSWORTH, NE US                  
+# GHCND:USC00395891 MURDO, SD US                      
+# GHCND:USC00395638 MISSION 14 S, SD US               
+# GHCND:US1SDCS0027 HERMOSA 10.3 ESE, SD US           
+# GHCND:USC00396304 ORAL, SD US                       
+# GHCND:US1SDJK0006 KADOKA 0.3 N, SD US    
+
+# download data from NOAA
+sta_rap <- meteo_tidy_ghcnd('USW00024090', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_hot <- meteo_tidy_ghcnd('US1SDFR0001', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_oel <- meteo_tidy_ghcnd('USC00396212', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_int <- meteo_tidy_ghcnd('USC00394184', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_cot <- meteo_tidy_ghcnd('USC00391972', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_lon <- meteo_tidy_ghcnd('USC00394983', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_har <- meteo_tidy_ghcnd('USC00253615', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_ain <- meteo_tidy_ghcnd('USC00250050', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_mur <- meteo_tidy_ghcnd('USC00395891', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_mis <- meteo_tidy_ghcnd('USC00395638', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_her <- meteo_tidy_ghcnd('US1SDCS0027', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_ora <- meteo_tidy_ghcnd('USC00396304', keep_flags = FALSE, 
+                         var = "PRCP")
+sta_kad <- meteo_tidy_ghcnd('US1SDJK0006', keep_flags = FALSE, 
+                         var = "PRCP")
+
+# save the data
+export(sta_rap, file = "data/sta_rap.csv")
+export(sta_hot, file = "data/sta_hot.csv")
+export(sta_oel, file = "data/sta_oel.csv")
+export(sta_int, file = "data/sta_int.csv")
+export(sta_cot, file = "data/sta_cot.csv")
+export(sta_lon, file = "data/sta_lon.csv")
+export(sta_har, file = "data/sta_har.csv")
+export(sta_ain, file = "data/sta_ain.csv")
+export(sta_mur, file = "data/sta_mur.csv")
+export(sta_mis, file = "data/sta_mis.csv")
+export(sta_her, file = "data/sta_her.csv")
+export(sta_ora, file = "data/sta_ora.csv")
+export(sta_kad, file = "data/sta_kad.csv")
+
+```
+
+```{r merge-precip-data, eval = FALSE}
+
+# these were downloaded from NOAA on 2018-06-01
+sta_hot <- import(file = "data/sta_hot.csv")
+sta_oel <- import(file = "data/sta_oel.csv")
+sta_int <- import(file = "data/sta_int.csv")
+sta_cot <- import(file = "data/sta_cot.csv")
+sta_lon <- import(file = "data/sta_lon.csv")
+sta_har <- import(file = "data/sta_har.csv")
+sta_ain <- import(file = "data/sta_ain.csv")
+sta_mur <- import(file = "data/sta_mur.csv")
+sta_mis <- import(file = "data/sta_mis.csv")
+sta_ora <- import(file = "data/sta_ora.csv")
+sta_kad <- import(file = "data/sta_kad.csv")
+sta_rap <- import(file = "data/sta_rap.csv") # kind of messed up!
+# sta_her <- import(file = "data/sta_her.csv") n = 304 obs so drop
+
+# join tables and rename prcp cols - data is in mm
+merge_sta1 <- full_join(sta_hot, sta_oel, by = "date")
+merge_sta1 <- merge_sta1 %>%
+  rename(hot = prcp.x) %>%
+  rename(orl = prcp.y) 
+
+merge_sta2 <- full_join(merge_sta1, sta_int, by = "date")
+merge_sta2 <- merge_sta2 %>%
+  rename(int = prcp)
+
+merge_sta3 <- full_join(merge_sta2, sta_cot, by = "date")
+merge_sta3 <- merge_sta3 %>%
+  rename(cot = prcp)
+
+merge_sta4 <- full_join(merge_sta3, sta_lon, by = "date")
+merge_sta4 <- merge_sta4 %>%
+  rename(lon = prcp)
+
+merge_sta5 <- full_join(merge_sta4, sta_har, by = "date")
+merge_sta5 <- merge_sta5 %>%
+  rename(har = prcp)
+
+merge_sta6 <- full_join(merge_sta5, sta_ain, by = "date")
+merge_sta6 <- merge_sta6 %>%
+  rename(ain = prcp)
+
+merge_sta7 <- full_join(merge_sta6, sta_mur, by = "date")
+merge_sta7 <- merge_sta7 %>%
+  rename(mur = prcp)
+
+merge_sta8 <- full_join(merge_sta7, sta_mis, by = "date")
+merge_sta8 <- merge_sta8 %>%
+  rename(mis = prcp)
+
+merge_sta9 <- full_join(merge_sta8, sta_ora, by = "date")
+merge_sta9 <- merge_sta9 %>%
+  rename(ora = prcp)
+
+merge_staA <- full_join(merge_sta9, sta_kad, by = "date")
+merge_staA <- merge_staA %>%
+  rename(kad = prcp)
+
+# fix stations for final merge
+sta_rap <- sta_rap %>%
+  mutate(date = ymd(date))
+
+merge_staA <- merge_staA %>%
+  mutate(date = ymd(date))
+
+sta <- full_join(merge_staA, sta_rap, by = "date")
+sta <- sta %>%
+  select(-starts_with("id")) %>%
+  rename(rap = prcp) %>%
+  arrange(desc(date))
+
+export(sta, file = "data/stations.csv")
+```
+
+
+```{r import-precip-data,}
+
+# load metadata
+sta_meta <- import("data/station_meta2.csv")
+sta <- import("data/stations.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+sta_kad <- import(file = "data/sta_kad.csv")
+
+# add year and month
+sta_kad <- sta_kad %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date))
+
+test <- sta_kad %>%
+  group_by(year, month) %>%
+  summarize(prcp = sum(prcp))
+
+temp %>% 
+  group_by(yr = year(date), mon = month(date)) %>% 
+  summarise(mn_amt = mean(amount))
+
+
+
+
+
+
+# gather stations
+sta_gath <- sta %>%
+  gather(key = "key", value = "prcp", -date, na.rm = FALSE)
+
+# add year and month
+sta_gath <- sta_gath %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date))
+
+test <- sta_gath
+
+
+temp %>% 
+  group_by(yr = year(date), mon = month(date)) %>% 
+  summarise(mn_amt = mean(amount))
+
+sta_mon <- sta %>%
+  group_by(month)
+summarize(years, pm25 = mean(pm25, na.rm = TRUE),
++           o3 = max(o3tmean2, na.rm = TRUE),
++           no2 = median(no2tmean2, na.rm = TRUE))
+
+# want to look at data without long valley and kadoka
+sta_filt <- sta %>%
+  select(-lon) %>%
+  select(-kad)
+
+sta_ne <- sta %>%
+  select(date, lon, kad, year, month)
+ggplot(sta_ne, aes(kad, lon)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+```{r}
+
+library(nycflights13)
+data_list <- list(airlines, airports, flights, planes, weather)
+plot_str(data_list, type = "r")
+
+merge_airlines <- merge(flights, airlines, by = "carrier", 
+                        all.x = TRUE)
+merge_planes <- merge(merge_airlines, planes, by = "tailnum",
+                      all.x = TRUE, 
+                      suffixes = c("_flights", "_planes"))
+merge_airports_origin <- merge(merge_planes, airports, 
+                               by.x = "origin", by.y = "faa", 
+                               all.x = TRUE, 
+                               suffixes = c("_carrier", "_origin"))
+final_data <- merge(merge_airports_origin, airports, by.x = "dest",
+                    by.y = "faa", all.x = TRUE, 
+                    suffixes = c("_origin", "_dest"))
+introduce(final_data)
+plot_missing(final_data)
+```
+
+
 <!--
 This is for including Chapter 1.  Notice that it's also good practice to name your chunk.  This will help you debug potential issues as you knit.  The chunk above is called intro and the one below is called chapter1.  Feel free to change the name of the Rmd file as you wish, but don't forget to change it here from chap1.Rmd.
 -->
 
 <!--
 The {#rmd-basics} text after the chapter declaration will allow us to link throughout the document back to the beginning of Chapter 1.  These labels will automatically be generated (if not specified) by changing the spaces to hyphens and capital letters to lowercase.  Look for the reference to this label at the beginning of Chapter 2.
--->
+
 
 # R Markdown Basics {#rmd-basics}
 

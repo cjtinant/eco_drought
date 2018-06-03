@@ -30,16 +30,39 @@ mermaid("gantt
        dateFormat  YYYY-MM-DD
        title PhD candidacy and Project scope
        section Candidacy
-       Send draft proposal        :done,    can1, 2018-04-10, 1d
-       Committee review           :done,    can2, after can1, 21d
-       Schedule defense           :active,  can3, 2018-05-07, 1d
-       Incorporate edits          :active,  can4, after can2, 14d
-       Send final draft           :crit,    can5, 2018-05-14, 1d
-       Oral defense               :crit,    can6, 2018-05-21, 1d
-       NSF Tribal Research Symp.  :crit,    can7, 2018-05-23, 2d
-")
-# add a next steps sections with IBI completio0n
+       Send draft proposal  :done,    can1, 2018-04-10, 1d
+       Committee review     :done,    can2, after can1, 21d
+       Schedule defense     :done,    can3, 2018-05-07, 1d
+       Incorporate edits    :active,  can4, after can2, 35d
+       Send final draft     :         can5, after can4, 1d
+       Oral defense         :done,    can6, 2018-05-21, 1d
+      ")
+```
 
+```{r watshed-rept, fig.align='left', fig.width = 50, echo=FALSE}
+# Gantt project overview with project scope
+# https://mermaidjs.github.io/gantt.html
+
+# Ask yourself if each of the objective meet the: 
+# SMART criteria for objectives
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Specific: is the objective clearly defined and self-contained?
+# Measurable: is there a clear indication of its completion?
+# Attainable: can the target be achieved?
+# Realistic: have sufficient resources been allocated to the task?
+# Time-bound: is there an associated completion date or milestone?
+
+mermaid("gantt
+       dateFormat  YYYY-MM-DD
+       title OST Watershed Reports
+       section Candidacy
+      OST Watershed Reports : active, can8, 2018-05-07, 2018-06-05
+     2012-13 Watershed Rept : done, can9, 2018-05-07, 2018-05-24
+      2014 data             : done, can10, 2018-05-26, 2018-05-30
+      2015 data             : active, can11, 2018-05-30, 2018-06-01
+      ")
+# add a next steps sections with IBI completio0n
+#        Incorporate 2014 data   : done, can9, 2018-05-26, 2018,05-30
 ```
 
 ```{r gantt-scope, echo=FALSE}
@@ -59,9 +82,9 @@ mermaid("gantt
        title Project scope
      section Objectives & Dissmenination
        Candidacy                  :       ovr1, 2018-04-10, 2018-06-01
-      OST Watershed Report      : active, ovr2, 2018-05-07, 2018-06-01
-       Ecological drought review  :       ovr3, after ovr2, 30d
-       Hydrological drought       :       ovr4, 2018-07-01, 75d
+      OST Watershed Report      : active, ovr2, 2018-05-07, 2018-06-05
+      Hydrological drought:       ovr3, after ovr2, 30d
+      Ecological drought review :       ovr4, 2018-07-01, 30d
        Taxa response to drought   :       ovr5, after ovr4, 75d
        Resiliance and resistance  :       ovr6, after ovr5, 75d
 ")
@@ -82,7 +105,7 @@ mermaid("gantt
        GitHub integration         : active, pre3, after pre1, 7d
 
    section Ch.1 Ecol. drought
-       Identify journal              : crit,   eco1, after pre10, 14d 
+       Identify journal              : crit,   eco1, after pre3, 14d 
        Proposal Reformat             :         eco2, after pre1, 10d
        Incorporate OST WPP IBI       :         eco3, after eco2, 10d
        Discuss ISA analysis          :    eco4, after eco3, 10d
@@ -96,7 +119,7 @@ mermaid("gantt
        dateFormat  YYYY-MM-DD
        title Chapters Two, Three and Four
       section Ch.2 Watershed processes
-       Semester end                  : crit,   drt1, 2018-05-15, 1d
+       Semester end                  : done,   drt1, 2018-05-15, 1d
        Identify Journal              : crit,   drt2, after drt1, 14d
        Learn purrr::map()            :         drt3, 2018-07-01, 4d
        Download station data         :         drt4, 2018-07-05, 2d
