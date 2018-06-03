@@ -56,6 +56,9 @@ library(lubridate)
 
 # library(unpivotr) # fix nasty Excel files
 # library("friendlyeval")
+
+# a useful description of commits:
+# http://r-pkgs.had.co.nz/git.html
 ```
 
 ```{r download-precip, eval = FALSE}
