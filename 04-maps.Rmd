@@ -40,7 +40,7 @@ library("dataRetrieval") # USGS data import
 library("rnoaa")
 
 # for Theissen polygons
-library(deldir) 
+library("deldir") 
 
 # Packages that are not likely to be called
 # library("DiagrammeR") # used to call 'mermaid' for a Gantt chart
@@ -300,7 +300,6 @@ ggplot(data = sta_meta, aes(x = lon, y = lat)) +
 
 
 ```{r voroni-diagram-final}
-
 # import location data and filter out:
 #   hermosa, ainsworth, harrison, hot springs
 sta_meta <- import("index/data/station_meta2.csv")
