@@ -150,31 +150,6 @@ sta <- sta %>%
   arrange(desc(date)) 
 
 export(sta, file = "data/stations.csv")
-
-# Drop these in the future
-# merge_staA <- full_join(merge_sta9, sta_kad, by = "date")
-#merge_staA <- merge_staA %>%
-#  rename(kad = prcp)
-
-#merge_sta2 <- full_join(merge_oel, sta_int, by = "date")
-#merge_sta2 <- merge_sta2 %>%
-#  rename(int = prcp)
-
-#merge_sta4 <- full_join(merge_sta3, sta_lon, by = "date")
-#merge_sta4 <- merge_sta4 %>%
-#  rename(lon = prcp)
-
-#merge_sta5 <- full_join(merge_sta4, sta_har, by = "date")
-#merge_sta5 <- merge_sta5 %>%
-#  rename(har = prcp)
-
-#merge_sta6 <- full_join(merge_sta5, sta_ain, by = "date")
-#merge_sta6 <- merge_sta6 %>%
-#  rename(ain = prcp)
-
-#merge_sta7 <- full_join(merge_sta6, sta_mur, by = "date")
-#merge_sta7 <- merge_sta7 %>%
-#  rename(mur = prcp)
 ```
 
 ```{r munge-precip-data,}
@@ -196,7 +171,6 @@ sta_raw <- sta_raw %>%
   select(date, year, month, everything())
 
 # Variable naming convention: 
-# dummy        swap variable for testing before updating master 
 # sta          precipitation station
 # _har         Harrision precip station - used to fill NA vals
 # _meta        metadata
@@ -204,10 +178,9 @@ sta_raw <- sta_raw %>%
 # _geXX        data greater than or equal to year XX
 # _geXXmYY     data greater than or equal to year XX and month YY 
 # _ltXXmYY     data less than year XX and month YY 
-# _clean       intermediate variable - clean part of NA split ;-}
-# _dirty       intermediate variable - NA part of NA split ;-}
-
-
+# _clean       intermediate df - clean part of NA split ;-}
+# _dirty       intermediate df - NA part of NA split ;-}
+# _int_Z       final df - after cleaning
 
 # remove NA in 2018 data - old code not listed in naming convention
 sta_not_2018    <- sta_raw %>% filter(year != 2018)
@@ -232,19 +205,9 @@ sta_not_2018    <- sta_raw %>% filter(year != 2018)
 # MISSION     1951 - 2018       
 # ORAL        1971 - 2018 
 
-# Test for cleaning 71 & 72
-#  test_ge72     <- sta_raw %>% filter(year == 1972)
-#  test_71m05 <- sta_raw %>% filter(year == 1971 & month >= 5)
-#test_ge71m05 <- bind_rows(test_ge72, test_71m05)
-#  rm(test_ge72, test_71m05)
 
-#test_le71    <- sta_raw %>% filter(year == 1971 & month < 5)
-#test         <- bind_rows(test_ge71m05, test_le71)
-#  rm(sta_72_bef, sta_1971m05_bef)
-
-
-
-# Sequential cleaning starting with ORAL start date
+# Clean Oral & part of Oelrichs 1971-05-01 to present
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Using nearest year as split-point
 #   1. Split the raw data into two parts at 1971-05-01
   sta_ge72      <- sta_raw %>% filter(year >= 1972) #
@@ -320,7 +283,8 @@ sta_ge71m05 <- bind_rows(sta_clean, sta_dirty)
 #   4. Put the pieces back together
 sta_ge71m05 <- sta_ge71m05 %>%
   select(-prcp, -id) 
-sta_int_1 <- bind_rows(sta_ge71m05, sta_lt71m05)
+sta_int1 <- bind_rows(sta_ge71m05, sta_lt71m05)
+rm(sta_ge71m05,sta_lt71m05)
 
 # Check work
 # introduce(sta_raw)
@@ -330,23 +294,9 @@ sta_int_1 <- bind_rows(sta_ge71m05, sta_lt71m05)
 # introduce(sta_int_1)
 #   rows columns  total_missing_values total_observations
 # 45592       9          101926             410328
-  
-  
-  
- 
 
-
-
-
-
-
-
-
-
-
-
-
-
+# export the work to a file
+export(sta_int1, file = "data/stations_int1.csv")  
 ```
 
 ```{r}
