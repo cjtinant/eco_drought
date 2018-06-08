@@ -1,34 +1,7 @@
-
-<!--
-Milestones for Chapter 1.
-Download station data
-  DL metadata completed
-  DL station precip obs completed
-  Voroni diagrams completed - final selection of sites
-  Created a single flat-file of sites
-
-Next steps:
-  Data cleaning - use Data Exploror 
-  merge precip d.fs
-
-Identify Journal  
-Calculate SPI & SPE           
-Learn purrr::map()            
-Develop SDI function          
-Watershed delineation        
-RF clustering of ungaged sta.
--->
-
-<!-- next steps
-update the maps to find the data file that moved under ~index
-push github
-fix thesis build
--->
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-# Get API key (aka, token) at http://www.ncdc.noaa.gov/cdo-web/token
+# Get API key (aka, token) for downloading precip data at http://www.ncdc.noaa.gov/cdo-web/token
 # token for NOAA API tied to jtinant@olc.edu
 options(noaakey = "VpcuARumMpCfFyclKHPfvskEYnaiLJHD")
 # see 'rnoaa' for details
@@ -44,12 +17,10 @@ library("DataExplorer")
 library("rnoaa") #  R wrapper for NOAA data inc. NCDC
 library("lubridate")
 
-
 # library("dataRetrieval") # USGS data import
 # library("RColorBrewer") - there is a better one?
 # library("workflowr") # creates a research website
 # library("colorspace")
-
 # library("bookdown") # 
 # library(unpivotr) # fix nasty Excel files
 # library("friendlyeval")
@@ -156,8 +127,8 @@ sta_rap <- import(file = "data/sta_rap.csv") # needs fixed & saved
 # join tables and rename prcp cols - data is in mm
 merge_sta1 <- full_join(sta_oel, sta_int, by = "date")
 merge_sta1 <- merge_sta1 %>%
-  rename(hot = prcp.x) %>%
-  rename(orl = prcp.y) 
+  rename(int = prcp.x) %>%
+  rename(oel = prcp.y) 
 
 merge_sta2 <- full_join(merge_sta1, sta_cot, by = "date")
 merge_sta2 <- merge_sta2 %>%
@@ -171,8 +142,6 @@ merge_sta4 <- full_join(merge_sta3, sta_ora, by = "date")
 merge_sta4 <- merge_sta4 %>%
   rename(ora = prcp)
 
-
-# full-join and arrange
 sta <- full_join(merge_sta4, sta_rap, by = "date")
 sta <- sta %>%
   select(-starts_with("id")) %>%
@@ -209,71 +178,131 @@ export(sta, file = "data/stations.csv")
 ```
 
 ```{r munge-precip-data,}
+# Purpose: fill NA prior to upscaling to monthly data
+
+# note on naming convention: 
+# dummy        swap variable for testing before updating master 
+# sta_xx       refers to start year (xx) to end of record
+# sta_xx_yy    refers to start year (xx) to end year (yy)
+# sta_xxxx     refers to data for only that year
+# sta_xxxxmyy  refers that year w/ later month (yy) starting date
+# sta_xxx_filt filter variable that disappears
+# sta_raw      the "mostly" raw dataset
+# sta_ intro   quick check of NA that disappears
+# sta_sw       Oelrichs & Oral
 
 # load metadata & data
-sta_meta <- import("data/sta_meta_fin.csv")
-sta <- import("data/stations.csv")
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_raw   <- import("data/stations.csv")
+sta_har   <- as.tibble(import("data/sta_har.csv"))
+  sta_har <- sta_har %>%
+    mutate(date = ymd(date)) # harrison used to fill NA
 
 # fix date & add year and month
-sta <- sta %>%
+sta_raw <- sta_raw %>%
   mutate(date = ymd(date)) %>%
-  arrange(desc(date)) 
+  arrange(desc(date)) %>%
   mutate(year = year(date)) %>%
   mutate(month = month(date)) %>%
   select(date, year, month, everything())
 
+
 # remove NA in 2018 data
-sta_not_2018 <- sta %>%
-  filter(year != 2018)
-sta_2018_filt <- sta %>%
-  filter(year == 2018 & month != 6)
-sta <- bind_rows(sta_not_2018, sta_2018_filt)
-rm(sta_2018_filt, sta_not_2018)
+sta_not_2018    <- sta_raw %>% filter(year != 2018)
+  sta_2018_filt <- sta_raw %>% filter(year == 2018 & month != 6)
+  sta_raw       <- bind_rows(sta_not_2018, sta_2018_filt)
+  rm(sta_2018_filt, sta_not_2018)
 
-#introduce(final_data)
-# plot_missing(final_data)
+# check NA in original
+# sta_intro <- as.tibble(introduce(sta))
+# sta_intro <- sta_intro %>%
+#  select(-(1:4)) 
 
+#  all_missing_columns total_missing_values total_observations
+#               <int>                <int>              <int>
+#                   0               102763             410328
 
+# NAs are caused in part by different start dates
+# OELRICHS    1893 - 2018    
+# COTTONWOOD  1909 - 2018  
+# RAPID CITY  1948 - 2018    
+# INTERIOR    1949 - 2018       
+# MISSION     1951 - 2018       
+# ORAL        1971 - 2018 
 
+# Test for cleaning 71 & 72
+  test_ge72     <- sta_raw %>% filter(year == 1972)
+  test_71m05 <- sta_raw %>% filter(year == 1971 & month >= 5)
+test_ge71m05 <- bind_rows(test_ge72, test_71m05)
+  rm(test_ge72, test_71m05)
 
-test <- sta_kad %>%
-  group_by(year, month) %>%
-  summarize(prcp = sum(prcp))
+test_le71    <- sta_raw %>% filter(year == 1971 & month < 5)
+test         <- bind_rows(test_ge71m05, test_le71)
+  rm(sta_72_bef, sta_1971m05_bef)
 
-temp %>% 
-  group_by(yr = year(date), mon = month(date)) %>% 
-  summarise(mn_amt = mean(amount))
+# Sequential cleaning starting with ORAL start date
+# Using nearest year as split-point
+#   1. Split the raw data into two parts at 1971-05-01
+  sta_ge72      <- sta_raw %>% filter(year >= 1972) #
+  sta_71m05     <- sta_raw %>% filter(year == 1971 & month >= 5)
+sta_ge71m05     <- bind_rows(sta_ge72, sta_71m05)
+  rm(sta_72, sta_1971m05)
 
-# gather stations
-sta_gath <- sta %>%
-  gather(key = "key", value = "prcp", -date, na.rm = FALSE)
+  sta_le71      <- sta_raw %>% filter(year < 1971)
+  sta_71m01_m05 <- sta_raw %>% filter(year == 1971 & month < 5)
+sta_le71m05     <- bind_rows(sta_le71, sta_71m01_m05)
+  rm(sta_le71, sta_71m01_m05)
 
-# add year and month
-sta_gath <- sta_gath %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date))
+#   2. Clean Oral NA - has 368 NA <- filling with Oelrichs
+#        Result: 10 NA values 
+sta_notNA <- sta_71 %>%
+  filter(!is.na(ora))
 
-temp %>% 
-  group_by(yr = year(date), mon = month(date)) %>% 
-  summarise(mn_amt = mean(amount))
+sta_NA <- sta_71 %>%
+  filter(is.na(ora)) %>%
+  mutate(ora = oel) 
+dummy <- bind_rows(sta_notNA, sta_NA)
+  
+sta_check <- dummy %>%
+  filter(is.na(ora))
+  
+sta_71 <- dummy      # update with fixed Oral data
 
-sta_mon <- sta %>%
-  group_by(month)
-summarize(years, pm25 = mean(pm25, na.rm = TRUE),
-+           o3 = max(o3tmean2, na.rm = TRUE),
-+           no2 = median(no2tmean2, na.rm = TRUE))
+#   3. Clean Oelrichs NA - has 469 NA <- filling with Oelrichs
+#        Result: 10 NA values 
+sta_notNA <- sta_71 %>%
+  filter(!is.na(oel))
 
-# want to look at data without long valley and kadoka
-sta_filt <- sta %>%
-  select(-lon) %>%
-  select(-kad)
+sta_NA <- sta_71 %>%
+  filter(is.na(oel)) %>%
+  mutate(oel = ora) 
+dummy <- bind_rows(sta_notNA, sta_NA)
+  
+sta_check <- dummy %>%
+  filter(is.na(oel))  
 
-sta_ne <- sta %>%
-  select(date, lon, kad, year, month)
-ggplot(sta_ne, aes(kad, lon)) +
-  geom_point() +
-  geom_smooth(method = "lm")
+#   3. Clean Oral & Oelrich remain NA - 10 NA <- filling with Harrison #        Result: Zero NA values- Oral & Oelrichs
+dummy <- left_join(dummy, sta_har, by = "date")
+  rm(sta_har)
+sta_notNA <- dummy %>%
+  filter(!is.na(ora))
 
+sta_NA <- dummy %>%
+  filter(is.na(ora)) %>%
+  mutate(ora = prcp) %>%
+  mutate(oel = prcp) 
+  
+dummy <- bind_rows(sta_notNA, sta_NA)
+dummy <- dummy %>%
+  select(-(id:prcp))
+
+sta_check <- dummy %>%
+  filter(is.na(oel))   # checks out - zero NA for Oelrichs
+
+sta_71 <- dummy      # update with fixed Oral & Oelrichs data
+
+#   4. Add results together, drop Oral, and split on next oldest sta
+sta_work <- rbind(sta_71, sta_71_bef)
 ```
 
 ```{r}

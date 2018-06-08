@@ -257,7 +257,7 @@ export(site, "data/site_meta.csv")
 
 ```{r voroni-diagram-initial}
 # import location data 
-sta_meta <- import("data/station_meta2.csv")
+sta_meta <- import("index/data/Archived/station_meta2.csv")
 sta_meta <- sta_meta %>%
   filter(id != "GHCND:US1SDCS0027") # filters out hermosa (short rec.)
 
