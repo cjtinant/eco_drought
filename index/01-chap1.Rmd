@@ -180,17 +180,6 @@ export(sta, file = "data/stations.csv")
 ```{r munge-precip-data,}
 # Purpose: fill NA prior to upscaling to monthly data
 
-# note on naming convention: 
-# dummy        swap variable for testing before updating master 
-# sta_xx       refers to start year (xx) to end of record
-# sta_xx_yy    refers to start year (xx) to end year (yy)
-# sta_xxxx     refers to data for only that year
-# sta_xxxxmyy  refers that year w/ later month (yy) starting date
-# sta_xxx_filt filter variable that disappears
-# sta_raw      the "mostly" raw dataset
-# sta_ intro   quick check of NA that disappears
-# sta_sw       Oelrichs & Oral
-
 # load metadata & data
 sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
 sta_raw   <- import("data/stations.csv")
@@ -206,8 +195,21 @@ sta_raw <- sta_raw %>%
   mutate(month = month(date)) %>%
   select(date, year, month, everything())
 
+# Variable naming convention: 
+# dummy        swap variable for testing before updating master 
+# sta          precipitation station
+# _har         Harrision precip station - used to fill NA vals
+# _meta        metadata
+# _raw         the "mostly" raw dataset
+# _geXX        data greater than or equal to year XX
+# _geXXmYY     data greater than or equal to year XX and month YY 
+# _ltXXmYY     data less than year XX and month YY 
+# _clean       intermediate variable - clean part of NA split ;-}
+# _dirty       intermediate variable - NA part of NA split ;-}
 
-# remove NA in 2018 data
+
+
+# remove NA in 2018 data - old code not listed in naming convention
 sta_not_2018    <- sta_raw %>% filter(year != 2018)
   sta_2018_filt <- sta_raw %>% filter(year == 2018 & month != 6)
   sta_raw       <- bind_rows(sta_not_2018, sta_2018_filt)
@@ -231,99 +233,126 @@ sta_not_2018    <- sta_raw %>% filter(year != 2018)
 # ORAL        1971 - 2018 
 
 # Test for cleaning 71 & 72
-  test_ge72     <- sta_raw %>% filter(year == 1972)
-  test_71m05 <- sta_raw %>% filter(year == 1971 & month >= 5)
-test_ge71m05 <- bind_rows(test_ge72, test_71m05)
-  rm(test_ge72, test_71m05)
+#  test_ge72     <- sta_raw %>% filter(year == 1972)
+#  test_71m05 <- sta_raw %>% filter(year == 1971 & month >= 5)
+#test_ge71m05 <- bind_rows(test_ge72, test_71m05)
+#  rm(test_ge72, test_71m05)
 
-test_le71    <- sta_raw %>% filter(year == 1971 & month < 5)
-test         <- bind_rows(test_ge71m05, test_le71)
-  rm(sta_72_bef, sta_1971m05_bef)
+#test_le71    <- sta_raw %>% filter(year == 1971 & month < 5)
+#test         <- bind_rows(test_ge71m05, test_le71)
+#  rm(sta_72_bef, sta_1971m05_bef)
+
+
 
 # Sequential cleaning starting with ORAL start date
 # Using nearest year as split-point
 #   1. Split the raw data into two parts at 1971-05-01
   sta_ge72      <- sta_raw %>% filter(year >= 1972) #
   sta_71m05     <- sta_raw %>% filter(year == 1971 & month >= 5)
-sta_ge71m05     <- bind_rows(sta_ge72, sta_71m05)
-  rm(sta_72, sta_1971m05)
+sta_ge71m05     <- bind_rows(sta_ge72, sta_71m05) # this is active
+  rm(sta_ge72, sta_71m05)
 
   sta_le71      <- sta_raw %>% filter(year < 1971)
   sta_71m01_m05 <- sta_raw %>% filter(year == 1971 & month < 5)
-sta_le71m05     <- bind_rows(sta_le71, sta_71m01_m05)
+sta_lt71m05     <- bind_rows(sta_le71, sta_71m01_m05) # this is not
   rm(sta_le71, sta_71m01_m05)
 
-#   2. Clean Oral NA - has 368 NA <- filling with Oelrichs
-#        Result: 10 NA values 
-sta_notNA <- sta_71 %>%
-  filter(!is.na(ora))
+#   2. filter NA vals from Oral
+#     Before = 368 NA <- filling with Oelrichs
+#     After: 10 concurrent NA values 
 
-sta_NA <- sta_71 %>%
+sta_clean <- sta_ge71m05 %>%
+  filter(!is.na(ora)) # this is not active
+
+sta_dirty <- sta_ge71m05 %>%
   filter(is.na(ora)) %>%
-  mutate(ora = oel) 
-dummy <- bind_rows(sta_notNA, sta_NA)
-  
-sta_check <- dummy %>%
-  filter(is.na(ora))
-  
-sta_71 <- dummy      # update with fixed Oral data
+  mutate(ora = oel) # fix oral with oelrichs
 
-#   3. Clean Oelrichs NA - has 469 NA <- filling with Oelrichs
-#        Result: 10 NA values 
-sta_notNA <- sta_71 %>%
-  filter(!is.na(oel))
+sta_ge71m05 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
 
-sta_NA <- sta_71 %>%
+# sta_NA_ora <- sta_ge71m05 %>%
+#  filter(is.na(ora)) # check is :-]
+
+#   3. filter NA vals from Oelrichs (oel)
+#     Before = 368 NA <- filling with Oral
+#     After: 10 concurrent NA values 
+
+sta_clean <- sta_ge71m05 %>%
+  filter(!is.na(oel)) # this is not active
+
+sta_dirty <- sta_ge71m05 %>%
   filter(is.na(oel)) %>%
-  mutate(oel = ora) 
-dummy <- bind_rows(sta_notNA, sta_NA)
-  
-sta_check <- dummy %>%
-  filter(is.na(oel))  
+  mutate(oel = ora) # fix  oelrichs with oral
 
-#   3. Clean Oral & Oelrich remain NA - 10 NA <- filling with Harrison #        Result: Zero NA values- Oral & Oelrichs
-dummy <- left_join(dummy, sta_har, by = "date")
+sta_ge71m05 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+  
+# sta_NA_oel <- sta_ge71m05 %>%
+#   filter(is.na(ora)) # check is :-]
+# rm(sta_NA_oel)
+
+#   4. fix Oelrichs & Oral NA with Harrision
+#     Before: 10 concurrent NA values 
+
+sta_ge71m05 <- left_join(sta_ge71m05, sta_har, by = "date")
   rm(sta_har)
-sta_notNA <- dummy %>%
-  filter(!is.na(ora))
 
-sta_NA <- dummy %>%
-  filter(is.na(ora)) %>%
-  mutate(ora = prcp) %>%
-  mutate(oel = prcp) 
+sta_clean <- sta_ge71m05 %>%
+  filter(!is.na(oel)) # this is not active
+
+sta_dirty <- sta_ge71m05 %>%
+  filter(is.na(oel)) %>%
+  mutate(oel = prcp) %>%
+  mutate(ora = prcp)
+
+sta_ge71m05 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+
+# sta_NA_oel <- sta_ge71m05 %>%
+#   filter(is.na(ora)) # check is :-]
+# rm(sta_NA_oel) 
   
-dummy <- bind_rows(sta_notNA, sta_NA)
-dummy <- dummy %>%
-  select(-(id:prcp))
+# sta_NA_ora <- sta_ge71m05 %>%
+#  filter(is.na(ora)) # check is :-] 
+# rm(sta_NA_ora)   
+  
+#   4. Put the pieces back together
+sta_ge71m05 <- sta_ge71m05 %>%
+  select(-prcp, -id) 
+sta_int_1 <- bind_rows(sta_ge71m05, sta_lt71m05)
 
-sta_check <- dummy %>%
-  filter(is.na(oel))   # checks out - zero NA for Oelrichs
+# Check work
+# introduce(sta_raw)
+#   rows columns  total_missing_values total_observations
+# 45592      9           102763             410328 
 
-sta_71 <- dummy      # update with fixed Oral & Oelrichs data
+# introduce(sta_int_1)
+#   rows columns  total_missing_values total_observations
+# 45592       9          101926             410328
+  
+  
+  
+ 
 
-#   4. Add results together, drop Oral, and split on next oldest sta
-sta_work <- rbind(sta_71, sta_71_bef)
+
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 ```{r}
 
-library(nycflights13)
-data_list <- list(airlines, airports, flights, planes, weather)
-plot_str(data_list, type = "r")
 
-merge_airlines <- merge(flights, airlines, by = "carrier", 
-                        all.x = TRUE)
-merge_planes <- merge(merge_airlines, planes, by = "tailnum",
-                      all.x = TRUE, 
-                      suffixes = c("_flights", "_planes"))
-merge_airports_origin <- merge(merge_planes, airports, 
-                               by.x = "origin", by.y = "faa", 
-                               all.x = TRUE, 
-                               suffixes = c("_carrier", "_origin"))
-final_data <- merge(merge_airports_origin, airports, by.x = "dest",
-                    by.y = "faa", all.x = TRUE, 
-                    suffixes = c("_origin", "_dest"))
-introduce(final_data)
+
 plot_missing(final_data)
 ```
 
