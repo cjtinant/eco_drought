@@ -204,7 +204,7 @@ sta_not_2018    <- sta_raw %>% filter(year != 2018)
 # RAPID CITY  1948 - 2018    
 # INTERIOR    1949 - 2018       
 # MISSION     1951 - 2018       
-# ORAL        1971 - 2018 
+# ORAL        1971 - 2018 - in.progress
 
 
 # Clean Oral & part of Oelrichs 1971-05-01 to present
@@ -639,6 +639,23 @@ sta_NA <- sta_ge49m11 %>%
    filter(is.na(int)) # check is :-]
  rm(sta_NA)
 
+#   4. filter NA vals from Cottonwood with Interior 
+#     Before: 850 NA <- filling with Cottonwood
+#     After: zero NA values 
+sta_clean <- sta_ge49m11 %>%
+  filter(!is.na(cot)) # this is not active
+
+sta_dirty <- sta_ge49m11 %>%
+  filter(is.na(cot)) %>%
+  mutate(cot = int) # fix Cottonwood with Interior
+
+sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+
+sta_NA <- sta_ge49m11 %>%
+  filter(is.na(cot)) # check is :-] # down to 3 vals
+  rm(sta_NA)
+ 
 #   5. Put the pieces back together
 sta_ge49m11 <- sta_ge49m11 %>%
   select(-prcp, -id) 
@@ -660,11 +677,11 @@ rm(sta_ge49m11, sta_lt49m11)
 # 45592       9           101068            410328
 
 introduce(sta_trans3)
-#   rows columns total_missing_values total_observations
-# 45592       9           100455            410328         
- 
+#   rows columns  total_missing_values total_observations
+# 45592       9            99605            410328
+
 # export the work to a file
-export(sta_trans3, file = "data/stations_trans2.csv")  
+export(sta_trans3, file = "data/stations_trans3.csv")  
 ```
 
 <!--
