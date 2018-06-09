@@ -300,17 +300,20 @@ ggplot(data = sta_meta, aes(x = lon, y = lat)) +
 
 
 ```{r voroni-diagram-final}
-# import location data and filter out:
+# import site location data and filter out:
 #   hermosa, ainsworth, harrison, hot springs
-sta_meta <- import("index/data/station_meta2.csv")
+sta_meta <- import("index/data/Archived/station_meta2.csv")
 sta_meta <- sta_meta %>%
   filter(id != "GHCND:US1SDCS0027") %>% # very short length - HER
   filter(id != "GHCND:USC00250050") %>% # outside region - AIN
   filter(id != "GHCND:USC00253615") %>% # outside region - HAR
   filter(id != "GHCND:US1SDFR0001") %>% # close to oral - HOT
   filter(id != "GHCND:USC00395891") %>% # outside range - MUR
-  filter(id != "GHCND:US1SDJK0006") %>% # too short - KAD
-  filter(id != "GHCND:USC00394983")   # love - but stopped 2012 - LON
+  filter(id != "GHCND:USC00394983") %>% # love - but stopped 2012 - LON
+  filter(id != "GHCND:US1SDJK0006") 
+
+# import gage location data
+gage_meta <- import("index/data/gage_meta.csv")
   
 # define the study area using data from the 'maps' package
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -325,7 +328,7 @@ prr <- subset(counties, subregion %in%
 voronoi <- deldir(sta_meta$lon, sta_meta$lat)
 
 #Plot the points, voronoi lines, and annotate
-ggplot(data = sta_meta, aes(x = lon, y = lat)) +
+p_site <- ggplot(data = sta_meta, aes(x = lon, y = lat)) +
   geom_point(
     fill = rgb(70, 130, 180, 255, maxColorValue = 255),
     pch = 21,
@@ -342,7 +345,13 @@ ggplot(data = sta_meta, aes(x = lon, y = lat)) +
   theme_bw() +
   geom_text(data = sta_meta, aes(label = name), size = 2.5) +
   ggtitle("Final Theissen Polygon Map")
-
+  
+p_site +
+  geom_point(data = gage_meta, aes(x = dec_long_va, 
+                                   y = dec_lat_va),
+    fill = rgb(70, 130, 180, 255, maxColorValue = 255),
+    fill = rgb(70, 130, 180, 255, maxColorValue = 255)) 
+  
 # One idea - kadoka is short but might be added to long valley, but
 # its easier to just use a single complete record from further away.
 
