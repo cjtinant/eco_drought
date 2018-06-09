@@ -152,8 +152,9 @@ sta <- sta %>%
 export(sta, file = "data/stations.csv")
 ```
 
-```{r munge-precip-data,}
-# Purpose: fill NA prior to upscaling to monthly data
+```{r munge-precip-data-oral,}
+# General Purpose: fill NA prior to upscaling to monthly data
+# Specific purpose - clean Oral
 
 # load metadata & data
 sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
@@ -180,7 +181,7 @@ sta_raw <- sta_raw %>%
 # _ltXXmYY     data less than year XX and month YY 
 # _clean       intermediate df - clean part of NA split ;-}
 # _dirty       intermediate df - NA part of NA split ;-}
-# _int_Z       final df - after cleaning
+# _transZ       final df - after cleaning
 
 # remove NA in 2018 data - old code not listed in naming convention
 sta_not_2018    <- sta_raw %>% filter(year != 2018)
@@ -283,7 +284,7 @@ sta_ge71m05 <- bind_rows(sta_clean, sta_dirty)
 #   4. Put the pieces back together
 sta_ge71m05 <- sta_ge71m05 %>%
   select(-prcp, -id) 
-sta_int1 <- bind_rows(sta_ge71m05, sta_lt71m05)
+sta_trans <- bind_rows(sta_ge71m05, sta_lt71m05)
 rm(sta_ge71m05,sta_lt71m05)
 
 # Check work
@@ -291,21 +292,380 @@ rm(sta_ge71m05,sta_lt71m05)
 #   rows columns  total_missing_values total_observations
 # 45592      9           102763             410328 
 
-# introduce(sta_int_1)
+# introduce(sta_trans1)
 #   rows columns  total_missing_values total_observations
 # 45592       9          101926             410328
 
 # export the work to a file
-export(sta_int1, file = "data/stations_int1.csv")  
+export(sta_trans, file = "data/stations_trans1.csv")  
 ```
 
-```{r}
+```{r munge-precip-data-mission,}
+# General Purpose: fill NA prior to upscaling to monthly data
+# Specific purpose - clean Mission
+
+# load metadata & data
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_trans <- import("data/stations_trans1.csv")
+sta_lon   <- import("data/sta_lon.csv")
+sta_int   <- import("data/sta_int.csv")
+
+# fix date & add year and month
+sta_trans <- sta_trans %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date)) %>%
+  select(date, year, month, everything())
+
+sta_lon <- sta_lon %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  select(date, everything())
 
 
+# Variable naming convention: 
+# sta          precipitation station
+# _meta        metadata
+# _trans        the "mostly" raw dataset
+# _geXX        data greater than or equal to year XX
+# _geXXmYY     data greater than or equal to year XX and month YY 
+# _ltXXmYY     data less than year XX and month YY 
+# _clean       intermediate df - clean part of NA split ;-}
+# _dirty       intermediate df - NA part of NA split ;-}
+# _int_Z       df - number increases after each cleaning
 
-plot_missing(final_data)
+# NAs are caused in part by different start dates
+# ORAL        1971 - 2018  -fixed
+# MISSION     1951 - 2018  -in.progress
+# INTERIOR    1949 - 2018      
+# RAPID CITY  1948 - 2018    
+# COTTONWOOD  1909 - 2018        
+# OELRICHS    1893 - 2018   
+
+
+# Clean Mission using Long Valley station data
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Using nearest year as split-point
+#   1. Split the raw data into two parts at 1951-08-01
+  sta_ge52      <- sta_trans %>% filter(year >= 1952) 
+  sta_51m08     <- sta_trans %>% filter(year == 1951 & month >= 8)
+sta_ge51m08     <- bind_rows(sta_ge52, sta_51m08) # this is active
+  rm(sta_ge52, sta_51m08)
+
+  sta_le51      <- sta_trans %>% filter(year < 1951)
+  sta_51m01_m08 <- sta_trans %>% filter(year == 1951 & month < 8)
+sta_lt51m08     <- bind_rows(sta_le51, sta_51m01_m08) # this is not
+  rm(sta_le51, sta_51m01_m08)
+
+#   2. Attach Long Valley to df
+sta_ge51m08 <- left_join(sta_ge51m08, sta_lon, by = "date")
+  rm(sta_lon)
+  
+#   3. filter NA vals from Mission with Long Valley
+#     Before = 858 NA <- filling with Long Valley
+#     After: 14 NA values 
+sta_clean <- sta_ge51m08 %>%
+  filter(!is.na(mis)) # this is not active
+
+sta_dirty <- sta_ge51m08 %>%
+  filter(is.na(mis)) %>%
+  mutate(mis = prcp) # fix Mission with Long Valley
+
+sta_ge51m08 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+
+#sta_NA <- sta_ge51m08 %>%
+#  filter(is.na(mis)) # check is :-] # down to 6 vals
+#  rm(sta_NA)
+
+#   4. Use the Interior vals to fill missing vals
+#     Before = 6 NA <- filling with Interior
+#     After: XX  NA values 
+
+sta_clean <- sta_ge51m08 %>%
+  filter(!is.na(mis)) # this is not active
+
+sta_dirty <- sta_ge51m08 %>%
+  filter(is.na(mis)) %>%
+  mutate(mis = int) # fix Mission with Interior
+
+sta_ge51m08 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty, sta_int)
+  
+sta_NA <- sta_ge51m08 %>%
+   filter(is.na(mis)) # check is :-]
+ rm(sta_NA)
+
+#   5. Put the pieces back together
+sta_ge51m08 <- sta_ge51m08 %>%
+  select(-prcp, -id) 
+sta_trans2 <- bind_rows(sta_ge51m08, sta_lt51m08)
+rm(sta_ge51m08,sta_lt51m08)
+
+# Check work
+# Raw
+#   rows columns  total_missing_values total_observations
+# 45592      9           102763             410328 
+
+introduce(sta_trans)
+# Trans1
+#   rows columns  total_missing_values total_observations
+# 45592       9           101926            410328      
+
+introduce(sta_trans2)
+#  rows columns  total_missing_values total_observations
+# 45592       9           101068            410328
+
+
+# export the work to a file
+export(sta_trans2, file = "data/stations_trans2.csv")  
 ```
 
+```{r munge-precip-data-int,}
+# General Purpose: fill NA prior to upscaling to monthly data
+# Specific purpose - clean Interior
+
+# load metadata & data
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_trans <- import("data/stations_trans2.csv")
+sta_mur   <- import("data/sta_mur.csv")
+
+# fix date & add year and month
+sta_trans <- sta_trans %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date)) %>%
+  select(date, year, month, everything())
+
+sta_mur <- sta_mur %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  select(date, everything())
+
+
+# Variable naming convention: 
+# sta          precipitation station
+# _meta        metadata
+# _trans        the "mostly" raw dataset
+# _geXX        data greater than or equal to year XX
+# _geXXmYY     data greater than or equal to year XX and month YY 
+# _ltXXmYY     data less than year XX and month YY 
+# _clean       intermediate df - clean part of NA split ;-}
+# _dirty       intermediate df - NA part of NA split ;-}
+# _int_Z       df - number increases after each cleaning
+
+# NAs are caused in part by different start dates
+# ORAL        1971 - 2018  -fixed
+# MISSION     1951 - 2018  -fixed
+# INTERIOR    1949 - 2018  -in.progress   
+# RAPID CITY  1948 - 2018    
+# COTTONWOOD  1909 - 2018        
+# OELRICHS    1893 - 2018   
+
+
+# Clean Interior using Cottonwood station data
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Using nearest year as split-point
+#   1. Split the raw data into two parts at 1949-11-01
+  sta_ge50      <- sta_trans %>% filter(year >= 1950) 
+  sta_49m11     <- sta_trans %>% filter(year == 1949 & month >= 11)
+sta_ge49m11     <- bind_rows(sta_ge50, sta_49m11) # this is active
+  rm(sta_ge50, sta_49m11)
+
+  sta_le50      <- sta_trans %>% filter(year < 1949)
+  sta_49m01_m11 <- sta_trans %>% filter(year == 1949 & month < 11)
+sta_lt49m11     <- bind_rows(sta_le50, sta_49m01_m11) # this is not
+  rm(sta_le50, sta_49m01_m11)
+
+#   2. filter NA vals from Interior with Cottonwood
+#     Before = 613 NA <- filling with Cottonwood
+#     After: 3 NA values 
+sta_clean <- sta_ge49m11 %>%
+  filter(!is.na(int)) # this is not active
+
+sta_dirty <- sta_ge49m11 %>%
+  filter(is.na(int)) %>%
+  mutate(int = cot) # fix Interior with Cottonwood
+
+sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+
+sta_NA <- sta_ge49m11 %>%
+  filter(is.na(int)) # check is :-] # down to 3 vals
+  rm(sta_NA)
+
+#   3. Attach Murdo to df to fill missing vals
+#     Before = 3 NA <- filling with Murdo
+#     After: XX  NA values 
+sta_ge49m11 <- left_join(sta_ge49m11, sta_mur, by = "date")
+  rm(sta_mur)
+  
+sta_clean <- sta_ge49m11 %>%
+  filter(!is.na(int)) # this is not active
+
+sta_dirty <- sta_ge49m11 %>%
+  filter(is.na(int)) %>%
+  mutate(int = prcp) # fix Interior with Interior
+
+sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+  
+sta_NA <- sta_ge49m11 %>%
+   filter(is.na(int)) # check is :-]
+ rm(sta_NA)
+
+#   5. Put the pieces back together
+sta_ge49m11 <- sta_ge49m11 %>%
+  select(-prcp, -id) 
+sta_trans3 <- bind_rows(sta_ge49m11, sta_lt49m11)
+rm(sta_ge49m11, sta_lt49m11)
+
+# Check work
+
+# Raw
+#   rows columns  total_missing_values total_observations
+# 45592      9           102763             410328 
+#
+# Trans1
+#   rows columns  total_missing_values total_observations
+# 45592       9           101926            410328      
+
+# Trans2
+#  rows columns  total_missing_values total_observations
+# 45592       9           101068            410328
+
+introduce(sta_trans3)
+#   rows columns total_missing_values total_observations
+# 45592       9           100455            410328         
+ 
+# export the work to a file
+export(sta_trans3, file = "data/stations_trans2.csv")  
+```
+
+
+```{r munge-precip-data-int,}
+# General Purpose: fill NA prior to upscaling to monthly data
+# Specific purpose - clean Interior
+
+# load metadata & data
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_trans <- import("data/stations_trans2.csv")
+sta_mur   <- import("data/sta_mur.csv")
+
+# fix date & add year and month
+sta_trans <- sta_trans %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date)) %>%
+  select(date, year, month, everything())
+
+sta_mur <- sta_mur %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  select(date, everything())
+
+
+# Variable naming convention: 
+# sta          precipitation station
+# _meta        metadata
+# _trans        the "mostly" raw dataset
+# _geXX        data greater than or equal to year XX
+# _geXXmYY     data greater than or equal to year XX and month YY 
+# _ltXXmYY     data less than year XX and month YY 
+# _clean       intermediate df - clean part of NA split ;-}
+# _dirty       intermediate df - NA part of NA split ;-}
+# _int_Z       df - number increases after each cleaning
+
+# NAs are caused in part by different start dates
+# ORAL        1971 - 2018  -fixed
+# MISSION     1951 - 2018  -fixed
+# INTERIOR    1949 - 2018  -fixed  
+# RAPID CITY  1948 - 2018  -in.progress 
+# COTTONWOOD  1909 - 2018        
+# OELRICHS    1893 - 2018   
+
+
+# Clean Interior using Cottonwood station data
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Using nearest year as split-point
+#   1. Split the raw data into two parts at 1949-11-01
+  sta_ge50      <- sta_trans %>% filter(year >= 1950) 
+  sta_49m11     <- sta_trans %>% filter(year == 1949 & month >= 11)
+sta_ge49m11     <- bind_rows(sta_ge50, sta_49m11) # this is active
+  rm(sta_ge50, sta_49m11)
+
+  sta_le50      <- sta_trans %>% filter(year < 1949)
+  sta_49m01_m11 <- sta_trans %>% filter(year == 1949 & month < 11)
+sta_lt49m11     <- bind_rows(sta_le50, sta_49m01_m11) # this is not
+  rm(sta_le50, sta_49m01_m11)
+
+#   2. filter NA vals from Interior with Cottonwood
+#     Before = 613 NA <- filling with Cottonwood
+#     After: 3 NA values 
+sta_clean <- sta_ge49m11 %>%
+  filter(!is.na(int)) # this is not active
+
+sta_dirty <- sta_ge49m11 %>%
+  filter(is.na(int)) %>%
+  mutate(int = cot) # fix Interior with Cottonwood
+
+sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+
+sta_NA <- sta_ge49m11 %>%
+  filter(is.na(int)) # check is :-] # down to 3 vals
+  rm(sta_NA)
+
+#   3. Attach Murdo to df to fill missing vals
+#     Before = 3 NA <- filling with Murdo
+#     After: XX  NA values 
+sta_ge49m11 <- left_join(sta_ge49m11, sta_mur, by = "date")
+  rm(sta_mur)
+  
+sta_clean <- sta_ge49m11 %>%
+  filter(!is.na(int)) # this is not active
+
+sta_dirty <- sta_ge49m11 %>%
+  filter(is.na(int)) %>%
+  mutate(int = prcp) # fix Interior with Interior
+
+sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
+  rm(sta_clean, sta_dirty)
+  
+sta_NA <- sta_ge49m11 %>%
+   filter(is.na(int)) # check is :-]
+ rm(sta_NA)
+
+#   5. Put the pieces back together
+sta_ge49m11 <- sta_ge49m11 %>%
+  select(-prcp, -id) 
+sta_trans3 <- bind_rows(sta_ge49m11, sta_lt49m11)
+rm(sta_ge49m11, sta_lt49m11)
+
+# Check work
+
+# Raw
+#   rows columns  total_missing_values total_observations
+# 45592      9           102763             410328 
+#
+# Trans1
+#   rows columns  total_missing_values total_observations
+# 45592       9           101926            410328      
+
+# Trans2
+#  rows columns  total_missing_values total_observations
+# 45592       9           101068            410328
+
+introduce(sta_trans3)
+#   rows columns total_missing_values total_observations
+# 45592       9           100455            410328         
+ 
+# export the work to a file
+export(sta_trans3, file = "data/stations_trans2.csv")  
+```
 
 <!--
 This is for including Chapter 1.  Notice that it's also good practice to name your chunk.  This will help you debug potential issues as you knit.  The chunk above is called intro and the one below is called chapter1.  Feel free to change the name of the Rmd file as you wish, but don't forget to change it here from chap1.Rmd.
