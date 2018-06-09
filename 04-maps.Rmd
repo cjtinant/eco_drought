@@ -302,15 +302,15 @@ ggplot(data = sta_meta, aes(x = lon, y = lat)) +
 ```{r voroni-diagram-final}
 # import location data and filter out:
 #   hermosa, ainsworth, harrison, hot springs
-sta_meta <- import("index/data/station_meta2.csv")
+sta_meta <- import("index/data/Archived/station_meta2.csv")
 sta_meta <- sta_meta %>%
   filter(id != "GHCND:US1SDCS0027") %>% # very short length - HER
   filter(id != "GHCND:USC00250050") %>% # outside region - AIN
   filter(id != "GHCND:USC00253615") %>% # outside region - HAR
   filter(id != "GHCND:US1SDFR0001") %>% # close to oral - HOT
   filter(id != "GHCND:USC00395891") %>% # outside range - MUR
-  filter(id != "GHCND:US1SDJK0006") %>% # too short - KAD
   filter(id != "GHCND:USC00394983")   # love - but stopped 2012 - LON
+  filter(id != "GHCND:US1SDJK0006") 
   
 # define the study area using data from the 'maps' package
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
