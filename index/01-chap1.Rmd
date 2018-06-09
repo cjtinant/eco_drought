@@ -449,12 +449,6 @@ sta_mur <- sta_mur %>%
   arrange(desc(date)) %>%
   select(date, everything())
 
-
-
-
-
-
-
 # Clean Interior using Cottonwood station data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Using nearest year as split-point
@@ -550,22 +544,25 @@ introduce(sta_trans3)
 export(sta_trans3, file = "data/stations_trans3.csv")  
 ```
 
-```{r munge-precip-data-working,}
+```{r munge-precip-data-rap,}
 # General Purpose: fill NA prior to upscaling to monthly data
-# Specific purpose - clean Interior
+# Specific purpose - clean Rapid City NA with Interior & Cottonwood
+# Rationale - this is the closest to the project area;
+#  remember the point estimates are for the project area.
+
+# Variable naming convention - see munge-precip-data-oral code chunk  
 
 # NAs are caused in part by different start dates
-# ORAL        1971 - 2018  -fixed
-# MISSION     1951 - 2018  -fixed
-# INTERIOR    1949 - 2018  -in.progress   
-# RAPID CITY  1948 - 2018    
-# COTTONWOOD  1909 - 2018        
+# ORAL        1971 - 2018  -fixed with Oelrichs & Harrison
+# MISSION     1951 - 2018  -fixed with Long Valley & Interior
+# INTERIOR    1949 - 2018  -fixed with Cottonwood & Murdo    
+# RAPID CITY  1948 - 2018  -in.progress with Interior & Cottonwood 
+# COTTONWOOD  1909 - 2018  -partially fixed with Interior      
 # OELRICHS    1893 - 2018   
 
 # load metadata & data
 sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
-sta_trans <- import("data/stations_trans2.csv")
-sta_mur   <- import("data/sta_mur.csv")
+sta_trans <- import("data/stations_trans3.csv")
 
 # fix date & add year and month
 sta_trans <- sta_trans %>%
@@ -575,85 +572,45 @@ sta_trans <- sta_trans %>%
   mutate(month = month(date)) %>%
   select(date, year, month, everything())
 
-sta_mur <- sta_mur %>%
-  mutate(date = ymd(date)) %>%
-  arrange(desc(date)) %>%
-  select(date, everything())
 
-
-# Variable naming convention: 
-# sta          precipitation station
-# _meta        metadata
-# _trans        the "mostly" raw dataset
-# _geXX        data greater than or equal to year XX
-# _geXXmYY     data greater than or equal to year XX and month YY 
-# _ltXXmYY     data less than year XX and month YY 
-# _clean       intermediate df - clean part of NA split ;-}
-# _dirty       intermediate df - NA part of NA split ;-}
-# _int_Z       df - number increases after each cleaning
-
-
-
-
-# Clean Interior using Cottonwood station data
+# Clean Rapid City using Interior & Cottonwood station data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Using nearest year as split-point
-#   1. Split the raw data into two parts at 1949-11-01
-  sta_ge50      <- sta_trans %>% filter(year >= 1950) 
-  sta_49m11     <- sta_trans %>% filter(year == 1949 & month >= 11)
-sta_ge49m11     <- bind_rows(sta_ge50, sta_49m11) # this is active
-  rm(sta_ge50, sta_49m11)
+#   1. Split the raw data into two parts at 1948-05-01
+  sta_ge49      <- sta_trans %>% filter(year >= 1949) # yr above
+  sta_48m05     <- sta_trans %>% filter(year == 1948 & month >= 5)
+sta_ge48m05     <- bind_rows(sta_ge49, sta_48m05) # this is active
+  rm(sta_ge49, sta_48m05)
 
-  sta_le50      <- sta_trans %>% filter(year < 1949)
-  sta_49m01_m11 <- sta_trans %>% filter(year == 1949 & month < 11)
-sta_lt49m11     <- bind_rows(sta_le50, sta_49m01_m11) # this is not
-  rm(sta_le50, sta_49m01_m11)
+  sta_lt49      <- sta_trans %>% filter(year < 1948)
+  sta_48m01_m05 <- sta_trans %>% filter(year == 1948 & month < 5)
+sta_lt48m05     <- bind_rows(sta_lt49, sta_48m01_m05) # this is not
+  rm(sta_lt49, sta_48m01_m05)
 
-#   2. filter NA vals from Interior with Cottonwood
-#     Before = 613 NA <- filling with Cottonwood
-#     After: 3 NA values 
-sta_clean <- sta_ge49m11 %>%
-  filter(!is.na(int)) # this is not active
+#   2. filter NA vals from Rapid City with Interior
+#     Before: 6 NA <- filling with Interior
+#     After: xx NA values 
+sta_clean <- sta_ge48m05 %>%
+  filter(!is.na(rap)) # this is not active
 
-sta_dirty <- sta_ge49m11 %>%
-  filter(is.na(int)) %>%
-  mutate(int = cot) # fix Interior with Cottonwood
+sta_dirty <- sta_ge48m05 %>%
+  filter(is.na(rap)) %>%
+  mutate(rap = int) # fix Rapid City with Interior
 
-sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
+sta_ge48m05 <- bind_rows(sta_clean, sta_dirty)
   rm(sta_clean, sta_dirty)
 
-sta_NA <- sta_ge49m11 %>%
-  filter(is.na(int)) # check is :-] # down to 3 vals
+sta_NA <- sta_ge48m05 %>%
+  filter(is.na(rap)) # check is :-] # down to zero vals
   rm(sta_NA)
 
-#   3. Attach Murdo to df to fill missing vals
-#     Before = 3 NA <- filling with Murdo
-#     After: XX  NA values 
-sta_ge49m11 <- left_join(sta_ge49m11, sta_mur, by = "date")
-  rm(sta_mur)
-  
-sta_clean <- sta_ge49m11 %>%
-  filter(!is.na(int)) # this is not active
-
-sta_dirty <- sta_ge49m11 %>%
-  filter(is.na(int)) %>%
-  mutate(int = prcp) # fix Interior with Interior
-
-sta_ge49m11 <- bind_rows(sta_clean, sta_dirty)
-  rm(sta_clean, sta_dirty)
-  
-sta_NA <- sta_ge49m11 %>%
-   filter(is.na(int)) # check is :-]
- rm(sta_NA)
-
-#   5. Put the pieces back together
-sta_ge49m11 <- sta_ge49m11 %>%
-  select(-prcp, -id) 
-sta_trans3 <- bind_rows(sta_ge49m11, sta_lt49m11)
-rm(sta_ge49m11, sta_lt49m11)
+#   4. Put the pieces back together
+#sta_ge48m05 <- sta_ge48m05 %>%
+#  select(-prcp, -id) 
+sta_trans4 <- bind_rows(sta_ge48m05, sta_lt48m05)
+rm(sta_ge48m05, sta_lt48m05)
 
 # Check work
-
 # Raw
 #   rows columns  total_missing_values total_observations
 # 45592      9           102763             410328 
@@ -663,15 +620,19 @@ rm(sta_ge49m11, sta_lt49m11)
 # 45592       9           101926            410328      
 
 # Trans2
-#  rows columns  total_missing_values total_observations
+# rows columns  total_missing_values total_observations
 # 45592       9           101068            410328
 
-introduce(sta_trans3)
-#   rows columns total_missing_values total_observations
+# Trans3
+# rows columns total_missing_values total_observations
 # 45592       9           100455            410328         
- 
+
+introduce(sta_trans4)
+# rows columns total_missing_values total_observations
+# 45592       9            99599            410328
+
 # export the work to a file
-export(sta_trans3, file = "data/stations_trans2.csv")  
+export(sta_trans4, file = "data/stations_trans4.csv")  
 ```
 
 
