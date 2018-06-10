@@ -4,7 +4,6 @@ author: "Charles Jason Tinant"
 date: "5/6/2018"
 output:
   pdf_document: default
-  html_document: default
 ---
 
 ```{r library}
@@ -33,10 +32,35 @@ mermaid("gantt
        Send draft proposal  :done,    can1, 2018-04-10, 1d
        Committee review     :done,    can2, after can1, 21d
        Schedule defense     :done,    can3, 2018-05-07, 1d
-       Incorporate edits    :active,  can4, after can2, 35d
-       Send final draft     :         can5, after can4, 1d
+       Incorporate edits    :active,  can4, after can2, 40d
+       Send final draft     :crit,    can5, after can4, 1d
        Oral defense         :done,    can6, 2018-05-21, 1d
       ")
+```
+
+```{r gantt-scope, echo=FALSE}
+# Gantt project overview with project scope
+# https://mermaidjs.github.io/gantt.html
+
+# Ask yourself if each of the objectives meet SMART criteria: 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Specific: is the objective clearly defined and self-contained?
+# Measurable: is there a clear indication of its completion?
+# Attainable: can the target be achieved?
+# Realistic: have sufficient resources been allocated to the task?
+# Time-bound: is there an associated completion date or milestone?
+
+mermaid("gantt
+       dateFormat  YYYY-MM-DD
+       title General Project scope
+       Candidacy                  :       ovr1, 2018-04-10, 2018-06-01
+      OST Watershed Report      : active, ovr2, 2018-05-07, 2018-06-15
+      Hydrological drought:       ovr3, 2018-06-04, 30d
+      Ecological drought review :       ovr4, 2018-07-01, 30d
+       Taxa response to drought   :       ovr5, after ovr4, 75d
+       Resiliance and resistance  :       ovr6, after ovr5, 75d
+") 
+# to save - save as a htmlwidget
 ```
 
 ```{r watshed-rept, fig.align='left', fig.width = 50, echo=FALSE}
@@ -55,40 +79,46 @@ mermaid("gantt
 mermaid("gantt
        dateFormat  YYYY-MM-DD
        title OST Watershed Reports
-       section Candidacy
-      OST Watershed Reports : active, can8, 2018-05-07, 2018-06-05
+      OST Watershed Reports : active, can8, 2018-05-07, 2018-06-15
      2012-13 Watershed Rept : done, can9, 2018-05-07, 2018-05-24
       2014 data             : done, can10, 2018-05-26, 2018-05-30
-      2015 data             : active, can11, 2018-05-30, 2018-06-01
+      2015 data             : active, can11, 2018-05-30, 2018-06-15
       ")
-# add a next steps sections with IBI completio0n
-#        Incorporate 2014 data   : done, can9, 2018-05-26, 2018,05-30
 ```
 
-```{r gantt-scope, echo=FALSE}
-# Gantt project overview with project scope
-# https://mermaidjs.github.io/gantt.html
-
-# Ask yourself if each of the objectives meet SMART criteria: 
+```{r gantt-Ch2_drought_char, fig.align='left', fig.width = 50, echo=FALSE}
+# Chapter 2. Drought characterization - Watershed
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Specific: is the objective clearly defined and self-contained?
-# Measurable: is there a clear indication of its completion?
-# Attainable: can the target be achieved?
-# Realistic: have sufficient resources been allocated to the task?
-# Time-bound: is there an associated completion date or milestone?
-
 mermaid("gantt
        dateFormat  YYYY-MM-DD
-       title Project scope
-     section Objectives & Dissmenination
-       Candidacy                  :       ovr1, 2018-04-10, 2018-06-01
-      OST Watershed Report      : active, ovr2, 2018-05-07, 2018-06-05
-      Hydrological drought:       ovr3, after ovr2, 30d
-      Ecological drought review :       ovr4, 2018-07-01, 30d
-       Taxa response to drought   :       ovr5, after ovr4, 75d
-       Resiliance and resistance  :       ovr6, after ovr5, 75d
+       title Chapter 2. Hydrologic process
+       Semester end                  : done,   drt1, 2018-05-15, 1d
+       Identify Journal              : crit,   drt2, after drt1, 30d
+       Download station data         : done,   drt3, 2018-06-04, 1d
+       Clean station data       : done, drt4, 2018-06-04, 2018-06-09
+       Learn purrr::map()            :         drt5, after drt4, 4d
+       Calculate SPI & SPE           :         drt6, after drt4, 14d
+       Develop SDI function          :         drt7, after drt6, 20d
+       Watershed delineation         :         drt8, after drt7, 10d
+       RF clustering of ungaged sta. :         drt9, after drt8, 15d
 ")
-# to save save as a htmlwidget
+```
+
+```{r gantt-Chx_drought_char, fig.align='left', fig.width = 50, echo=FALSE}
+# Chapter 3. Drought characterization - Watershed
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mermaid("gantt
+       dateFormat  YYYY-MM-DD
+       title Chapter Three
+      section Ch.3 Taxa response
+       Macroinvertebrate collection  : crit,   tax1, 2018-06-15, 5d
+       Input & validate macro data   :         tax2, 2018-07-01, 10d
+       NMS ordination                :         tax3, after tax2, 20d
+       PERMANOVA                     :         tax4, after tax3, 20d
+       Write results                 :         tax5, after tax4, 25d
+     section Ch4. Taxa Resilience 
+       Reframe results of taxa response:       res1, after tax5, 75d
+")
 ```
 
 ```{r gantt-overview_EcoDrought, fig.align='left', fig.width = 50, echo=FALSE}
@@ -111,34 +141,6 @@ mermaid("gantt
        Discuss ISA analysis          :    eco4, after eco3, 10d
 ")
 ```
-
-```{r gantt-drought_characterization, fig.align='left', fig.width = 50, echo=FALSE}
-# Chapter 2. Drought characterization
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mermaid("gantt
-       dateFormat  YYYY-MM-DD
-       title Chapters Two, Three and Four
-      section Ch.2 Watershed processes
-       Semester end                  : done,   drt1, 2018-05-15, 1d
-       Identify Journal              : crit,   drt2, after drt1, 14d
-       Learn purrr::map()            :         drt3, 2018-07-01, 4d
-       Download station data         :         drt4, 2018-07-05, 2d
-       Calculate SPI & SPE           :         drt5, after drt4, 14d
-       Develop SDI function          :         drt6, after drt5, 20d
-       Watershed delineation         :         drt7, after drt6, 10d
-       RF clustering of ungaged sta. :         drt8, after drt7, 15d
-
-      section Ch.3 Taxa response
-       Macroinvertebrate collection  : crit,   tax1, 2018-06-15, 5d
-       Input & validate macro data   :         tax2, after drt8, 10d
-       NMS ordination                :         tax3, after tax2, 20d
-       PERMANOVA                     :         tax4, after tax3, 20d
-       Write results                 :         tax5, after tax4, 25d
-     section Ch4. Taxa Resilience 
-       Reframe results of taxa response:       res1, after tax5, 75d
-")
-```
-
 
 ```{r gantt-candididacy, fig.align='left', fig.width = 50, echo=FALSE}
 
