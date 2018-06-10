@@ -34,6 +34,7 @@ Does the drought extent differ across the study area?
 
 2.0  Data read in from NOAA
 3.0  A fair amount of data munging to check, join and remove NAs
+3.1  Double-check unit vals - originally in tenths of mm; now in mm
 3.1  Change daily data into monthly data
 3.2  Cross-validate monthly data
 
@@ -1044,9 +1045,9 @@ intro_sta_fin
 export(sta_fin, file = "data/stations_final.csv") 
 ```
 
-```{r daily2monthly-precip}
-# General Purpose: convert daily precip to monthly precip
-# Specific purpose 
+```{r daily2monthly-precip, eval = FALSE}
+# General Purpose: prepare data for drought index
+# Specific purpose: convert daily precip to monthly precip 
 
 # load metadata & data
 sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
@@ -1061,7 +1062,8 @@ sta_day <- sta_day %>%
   select(date, year, month, everything())
 
 # gather daily values
-sta_gath <- gather(sta_day, key = "station", value = "prcp", -date, -year, -month, factor_key = TRUE)
+sta_gath <- gather(sta_day, key = "station", value = "prcp", -date, 
+                   -year, -month, factor_key = TRUE)
 
 # create groups
 sta_group <- sta_gath %>%
@@ -1069,16 +1071,47 @@ sta_group <- sta_gath %>%
 
 # sum daily precip over a month
 sta_gath_mon <- sta_group %>%
-  summarize(prcp_mon = sum(prcp))
+  summarize(prcp_tenths = sum(prcp)) %>%
+  mutate(prcp_mm = prcp_tenths/10) %>%
+  select(-prcp_tenths)
 
 # spread result - now in months 
 #   ...and take a bow, because this is MAGIC!  Thnx Tidyverse.
 sta_mon <- sta_gath_mon %>%
-  spread(station, prcp_mon) %>%
+  spread(station, prcp_mm) %>%
   mutate(day = 1) %>%
   mutate(date = make_date(year = year, month = month, day = day)) %>%
   select(date, year, month, everything()) %>%
   select(-day) %>%
   ungroup()
+
+rm(sta_day, sta_gath, sta_gath_mon, sta_group)
+export(sta_mon, file = "data/stations_monthly.csv") 
+```
+
+```{r EDA_monthly}
+# General Purpose: prepare data for drought index
+# Specific purpose: graphical EDA
+
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_mon   <- as.tibble(import("data/stations_monthly.csv"))
+
+# fix date & add year and month
+sta_mon <- sta_mon %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) 
+
+# gather daily values
+sta_gath <- gather(sta_mon, key = "station", value = "prcp", -date, 
+                   -year, -month, factor_key = TRUE)
+
+ggplot(sta_gath, aes(date, prcp)) +
+  geom_line() +
+  facet_grid(station ~ .) +
+  theme_classic() + 
+  labs(title = "Monthly precipitation",
+       subtitle = "Pine Ridge Reservation, SD for 1909-2018") +
+       xlab("Date") +
+       ylab("Depth, mm")
 ```
 
