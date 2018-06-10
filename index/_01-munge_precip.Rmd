@@ -1089,7 +1089,7 @@ rm(sta_day, sta_gath, sta_gath_mon, sta_group)
 export(sta_mon, file = "data/stations_monthly.csv") 
 ```
 
-```{r EDA_monthly}
+```{r ggplot_monthly}
 # General Purpose: prepare data for drought index
 # Specific purpose: graphical EDA
 
@@ -1101,10 +1101,11 @@ sta_mon <- sta_mon %>%
   mutate(date = ymd(date)) %>%
   arrange(desc(date)) 
 
-# gather daily values
+# gather monthly values
 sta_gath <- gather(sta_mon, key = "station", value = "prcp", -date, 
                    -year, -month, factor_key = TRUE)
 
+# plot
 ggplot(sta_gath, aes(date, prcp)) +
   geom_line() +
   facet_grid(station ~ .) +
@@ -1115,3 +1116,66 @@ ggplot(sta_gath, aes(date, prcp)) +
        ylab("Depth, mm")
 ```
 
+```{r monthly2yearly-precip, eval = FALSE}
+# General Purpose: prepare data for drought index
+# Specific purpose: convert monthly precip to yearly prcp 
+
+# load metadata & data
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_mon   <- as.tibble(import("data/stations_monthly.csv"))
+
+# fix date & add year and month
+sta_mon <- sta_mon %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) %>%
+  select(date, year, month, everything())
+
+# gather monthly values
+sta_gath <- gather(sta_mon, key = "station", value = "prcp", -date, 
+                   -year, -month, factor_key = TRUE)
+
+# create groups
+sta_group <- sta_gath %>%
+  group_by(year,  station)
+
+# sum monthly precip over a year
+sta_gath_yr <- sta_group %>%
+  summarize(prcp = sum(prcp)) 
+
+# spread result - now in years
+sta_yr <- sta_gath_yr %>%
+  spread(station, prcp) %>%
+  filter(year != 1909) %>%
+  filter(year != 2018) %>%
+  ungroup()
+
+rm(sta_mon, sta_gath, sta_gath_yr, sta_group)
+export(sta_yr, file = "data/stations_yearly.csv") 
+```
+
+```{r ggplot_yearly}
+# General Purpose: prepare data for drought index
+# Specific purpose: graphical EDA
+
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_yr   <- as.tibble(import("data/stations_yearly.csv"))
+
+# fix date & add year and month
+sta_yr <- sta_mon %>%
+  mutate(date = ymd(date)) %>%
+  arrange(desc(date)) 
+
+# gather yearly values
+sta_gath <- gather(sta_yr, key = "station", value = "prcp", 
+                   -year, factor_key = TRUE)
+
+# plot
+ggplot(sta_gath, aes(year, prcp)) +
+  geom_line() +
+  facet_grid(station ~ .) +
+  theme_classic() + 
+  labs(title = "Yearly precipitation",
+       subtitle = "Pine Ridge Reservation, SD for 1910-2017") +
+       xlab("Year") +
+       ylab("Depth, mm")
+```
