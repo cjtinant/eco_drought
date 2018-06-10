@@ -12,11 +12,11 @@ options(noaakey = "VpcuARumMpCfFyclKHPfvskEYnaiLJHD")
 library("tidyverse")
 library("here") # identifies where to save work
 library("rio") # more robust I/O - to import and clean data
-library("janitor") # tools for examining and cleaning dirty data
-library("DataExplorer")
+library("DataExplorer") # quick look at NA vals
 library("rnoaa") #  R wrapper for NOAA data inc. NCDC
 library("lubridate")
 
+# library("janitor") # tools for examining and cleaning dirty data
 # library("dataRetrieval") # USGS data import
 # library("RColorBrewer") - there is a better one?
 # library("workflowr") # creates a research website
