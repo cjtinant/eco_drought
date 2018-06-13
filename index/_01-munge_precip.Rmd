@@ -48,13 +48,15 @@ options(noaakey = "VpcuARumMpCfFyclKHPfvskEYnaiLJHD")
 ```
 
 ```{r library, include=FALSE, message=FALSE}
-# Sets up the library of packages 
+# Sets up the library of packages  
 library("tidyverse")
 library("here") # identifies where to save work
 library("rio") # more robust I/O - to import and clean data
 library("DataExplorer") # quick look at NA vals
 library("rnoaa") #  R wrapper for NOAA data inc. NCDC
-library("lubridate")
+library("lubridate") # easier dates
+library("corrplot") # correlation plots
+library("broom") # tidies linear models
 
 # library("janitor") # tools for examining and cleaning dirty data
 # library("dataRetrieval") # USGS data import
@@ -888,106 +890,96 @@ export(sta_trans5, file = "data/stations_trans5.csv")
 ```
 
 ```{r munge-precip-data-oel, eval = FALSE}
-# General Purpose: fill NA prior to upscaling to monthly data
-# Specific purpose - clean Oelrichs with Murdo & 
-#   define oldest date with continuous data
+# General Purpose: fill NA prior to upscaling to monthly data 
+# Specific purpose - clean Oelrichs with Murdo &  
+#   define oldest date with continuous data 
 
 # Variable naming convention - see munge-precip-data-oral code chunk  
 
-# NAs are caused in part by different start dates
-# ORAL        1971 - 2018  -fixed with Oelrichs & Harrison
-# MISSION     1951 - 2018  -fixed with Long Valley & Interior
-# INTERIOR    1949 - 2018  -fixed with Cottonwood & Murdo    
-# RAPID CITY  1948 - 2018  -fixed with Interior  
-# COTTONWOOD  1909 - 2018  -fixed with Interior & Murdo
-# OELRICHS    1893 - 2018  -in.progress with Murdo
+# NAs are caused in part by different start dates 
+# ORAL        1971 - 2018  -fixed with Oelrichs & Harrison 
+# MISSION     1951 - 2018  -fixed with Long Valley & Interior 
+# INTERIOR    1949 - 2018  -fixed with Cottonwood & Murdo     
+# RAPID CITY  1948 - 2018  -fixed with Interior   
+# COTTONWOOD  1909 - 2018  -fixed with Interior & Murdo 
+# OELRICHS    1893 - 2018  -in.progress with Murdo 
 
-# load metadata & data
-sta_meta      <- as.tibble(import("data/sta_meta_fin.csv"))
-sta_meta_orig <- as.tibble(import("data/Archived/station_meta2.csv"))
-sta_trans     <- import("data/stations_trans5.csv")
+# load metadata & data 
+sta_meta      <- as.tibble(import("data/sta_meta_fin.csv")) 
+sta_meta_orig <- as.tibble(import("data/Archived/station_meta2.csv")) 
+sta_trans     <- import("data/stations_trans5.csv") 
 
-# fix date & add year and month
-sta_trans <- sta_trans %>%
-  mutate(date = ymd(date)) %>%
-  arrange(desc(date)) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  select(date, year, month, everything())
+# fix date & add year and month 
+sta_trans <- sta_trans %>% 
+  mutate(date = ymd(date)) %>% 
+  arrange(desc(date)) %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  select(date, year, month, everything()) 
 
-# Clean Oelrichs precip NA using Murdo station data
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Using nearest year as split-point 
-#   In this case it is the filler, Murdo, rather than the recipient
-#   1. Split the raw data into two parts at 1907-12-01
-  sta_ge08      <- sta_trans %>% filter(year >= 1908) # yr above
-  sta_07m12     <- sta_trans %>% filter(year == 1907 & month >= 12)
-sta_ge07m12     <- bind_rows( sta_ge08, sta_07m12) # this is active
-  rm(sta_ge08, sta_07m12)
+# Clean Oelrichs precip NA using Murdo station data 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+# Using nearest year as split-point  
+#   In this case it is the filler, Murdo, rather than the recipient 
+#   1. Split the raw data into two parts at 1907-12-01 
+  sta_ge08      <- sta_trans %>% filter(year >= 1908) # yr above 
+  sta_07m12     <- sta_trans %>% filter(year == 1907 & month >= 12) 
+sta_ge07m12     <- bind_rows( sta_ge08, sta_07m12) # this is active 
+  rm(sta_ge08, sta_07m12) 
 
-  sta_lt07     <- sta_trans %>% filter(year < 1907)
-  sta_07m1_m12 <- sta_trans %>% filter(year == 1907 & month < 12)
-sta_lt07m12     <- bind_rows(sta_lt07, sta_07m1_m12) # this is not
-  rm(sta_lt07, sta_07m1_m12)
+  sta_lt07     <- sta_trans %>% filter(year < 1907) 
+  sta_07m1_m12 <- sta_trans %>% filter(year == 1907 & month < 12) 
+sta_lt07m12     <- bind_rows(sta_lt07, sta_07m1_m12) # this is not 
+  rm(sta_lt07, sta_07m1_m12) 
 
-#Check on split :-)
-count_check <- bind_rows(sta_ge07m12, sta_lt07m12) 
-rm(count_check)
+#Check on split :-) 
+count_check <- bind_rows(sta_ge07m12, sta_lt07m12)  
+rm(count_check) 
   
-#   2. filter NA vals from Oelrichs & fill with Murdo
-#     Before: 1478 NA <- filling with Murdo
-#     After: 186 NA values 
-sta_clean <- sta_ge07m12 %>%
-  filter(!is.na(oel)) # this is not active
+#   2. filter NA vals from Oelrichs & fill with Murdo 
+#     Before: 1478 NA <- filling with Murdo 
+#     After: 186 NA values  
+sta_clean <- sta_ge07m12 %>% 
+  filter(!is.na(oel)) # this is not active 
 
-sta_dirty <- sta_ge07m12 %>%
-  filter(is.na(oel)) %>%
-  mutate(oel = mur) # oelrichs with Murdo
+sta_dirty <- sta_ge07m12 %>% 
+  filter(is.na(oel)) %>% 
+  mutate(oel = mur) # oelrichs with Murdo 
 
-sta_ge07m12 <- bind_rows(sta_clean, sta_dirty)
-  rm(sta_clean, sta_dirty)
+sta_ge07m12 <- bind_rows(sta_clean, sta_dirty) 
+  rm(sta_clean, sta_dirty) 
 
-  #Check on split :-)
-count_check <- bind_rows(sta_ge07m12, sta_lt07m12) 
-rm(count_check)
+  #Check on split :-) 
+count_check <- bind_rows(sta_ge07m12, sta_lt07m12)  
+rm(count_check) 
   
-sta_NA <- sta_ge07m12 %>%
-  filter(is.na(oel)) %>%
-  arrange() # check is :-] # down to 186 vals; fill with Cottonwood
-rm(sta_NA)
+sta_NA <- sta_ge07m12 %>% 
+  filter(is.na(oel)) %>% 
+  arrange() # check is :-] # down to 186 vals; fill with Cottonwood 
+rm(sta_NA) 
 
-#   3. filter NA vals from Oelrichs & fill with Cottonwood
-#     Before: 186 NA <- filling with Cottonwood
-#     After: 22 NA values 
-sta_clean <- sta_ge07m12 %>%
-  filter(!is.na(oel)) # this is not active
+#   3. filter NA vals from Oelrichs & fill with Cottonwood 
+#     Before: 186 NA <- filling with Cottonwood 
+#     After: 22 NA values  
+sta_clean <- sta_ge07m12 %>% 
+  filter(!is.na(oel)) # this is not active 
 
-sta_dirty <- sta_ge07m12 %>%
-  filter(is.na(oel)) %>%
-  mutate(oel = cot) # oelrichs with Cottonwood
+sta_dirty <- sta_ge07m12 %>% 
+  filter(is.na(oel)) %>% 
+  mutate(oel = cot) # oelrichs with Cottonwood 
 
-sta_ge07m12 <- bind_rows(sta_clean, sta_dirty)
-  rm(sta_clean, sta_dirty)
+sta_ge07m12 <- bind_rows(sta_clean, sta_dirty) 
+  rm(sta_clean, sta_dirty) 
 
-sta_NA <- sta_ge07m12 %>%
-  filter(is.na(oel)) %>%
-  arrange() # check is :-] # down to 22 vals;
-# Oldest is 1909-05-28, so this is the end of the record
-# The end of the complete record is 1909-06-01
+sta_NA <- sta_ge07m12 %>% 
+  filter(is.na(oel)) %>% 
+  arrange() # check is :-] # down to 22 vals; 
+# Oldest is 1909-05-28, so this is the end of the record 
+# The end of the complete record is 1909-06-01 
   
-#   4. Put the pieces back together & cut to end of complete record
-sta_trans6 <- bind_rows(sta_ge07m12, sta_lt07m12)
-rm(sta_ge07m12, sta_lt07m12, sta_NA)
-
-  sta_ge10      <- sta_trans6 %>% filter(year >= 1910) # yr above
-  sta_09m06     <- sta_trans6 %>% filter(year == 1909 & month >= 6)
-sta_fin     <- bind_rows( sta_ge10, sta_09m06) # this is active
-  rm(sta_ge10, sta_09m06)
-  
-#   5. Clean up final precip dataset
-sta_fin <- sta_fin %>%
-  select(-mur) %>%
-  arrange(date)
+#   4. Put the pieces back together & cut to end of complete record 
+sta_trans6 <- bind_rows(sta_ge27m07, sta_lt07m12) 
+rm(sta_ge07m12, sta_lt07m12, sta_NA) 
 
 # Check work
 # A tibble: 1 x 4 - Raw
@@ -1032,26 +1024,296 @@ intro_trans6
    
 # export the work to a file
 export(sta_trans6, file = "data/stations_trans6.csv") 
+```
+
+```{r munge-precip-data-lon, eval = FALSE}
+# General Purpose: fill NA prior to upscaling to monthly data 
+# Specific purpose - Append Long Valley with Mission  
+
+# Variable naming convention - see munge-precip-data-oral code chunk  
+# NAs are caused in part by different start dates 
+# ORAL        1971 - 2018  -fixed with Oelrichs & Harrison 
+# MISSION     1951 - 2018  -fixed with Long Valley & Interior 
+# INTERIOR    1949 - 2018  -fixed with Cottonwood & Murdo     
+# RAPID CITY  1948 - 2018  -fixed with Interior   
+# COTTONWOOD  1909 - 2018  -fixed with Interior & Murdo 
+# OELRICHS    1893 - 2018  -fixed with Murdo  
+# LONG VALLEY 1927 - 2012  -in.progress with Mission & Cottonwood 
+
+# load metadata & data 
+# Note: the metadata was changed in this step.  A once only change. 
+#sta_meta      <- as.tibble(import("data/sta_meta_fin.csv")) 
+#sta_meta_orig <- as.tibble(import("data/Archived/station_meta2.csv") 
+sta_trans     <- as.tibble(import("data/stations_trans6.csv")) 
+sta_lon       <- as.tibble(import("data/sta_lon.csv")) 
+
+# add Long Valley & remove Mission metadata 
+#sta_meta_lon <- sta_meta_orig %>% 
+#  filter(name == "LONG VALLEY, SD US") 
+#sta_meta2    <- bind_rows(sta_meta, sta_meta_lon)  
+#sta_meta2    <- sta_meta2 %>%  
+#  filter(name != "MISSION 14 S, SD US") 
+#export(sta_meta2, file = "data/sta_meta_fin2.csv") 
+sta_meta      <- as.tibble(import("data/sta_meta_fin2.csv")) 
+
+
+# fix date, add year and month, and join Long Valley 
+sta_trans <- sta_trans %>% 
+  mutate(date = ymd(date)) %>% 
+  arrange(desc(date)) %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  select(date, year, month, everything()) 
+
+sta_lon <- sta_lon %>% 
+  mutate(date = ymd(date)) %>% 
+  arrange(desc(date)) %>% 
+  select(date, everything()) 
+
+sta_trans <- left_join(sta_trans, sta_lon) 
+rm(sta_lon) 
+
+sta_trans <- sta_trans %>% 
+  select(-id) %>% 
+  rename(lon = prcp) 
+
+# Clean Long Valley precip NA using Mission station data 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+# Using nearest year as split-point 
+#   1. Split the raw data into two parts at 1927-07-01 
+  sta_ge28      <- sta_trans %>% filter(year >= 1928) # yr above 
+  sta_27m07    <- sta_trans %>% filter(year == 1927 & month >= 7) 
+sta_ge27m07    <- bind_rows( sta_ge28, sta_27m07) # this is active 
+  rm(sta_ge28, sta_27m07) 
+
+  sta_lt27     <- sta_trans %>% filter(year < 1927) 
+  sta_27m1_m7 <- sta_trans %>% filter(year == 1927 & month < 7) 
+sta_lt27m07     <- bind_rows(sta_lt27, sta_27m1_m7) # this is not 
+  rm(sta_lt27, sta_27m1_m7) 
+
+#Check on split :-) 
+count_check <- bind_rows(sta_ge27m07, sta_lt27m07)  
+rm(count_check) 
+  
+#   2. filter NA vals from Long Valley & fill with Mission 
+#     Before: 2904 NA <- filling with Mission 
+#     After: 423 NA values  
+sta_clean <- sta_ge27m07%>% 
+  filter(!is.na(lon)) # this is not active 
+
+sta_dirty <- sta_ge27m07%>% 
+  filter(is.na(lon)) %>% 
+  mutate(lon = mis) # Long Valley with Mission 
+
+sta_ge27m07<- bind_rows(sta_clean, sta_dirty) 
+  rm(sta_clean, sta_dirty) 
+
+# Check on split :-) 
+count_check <- bind_rows(sta_ge27m07, sta_lt27m07)  
+rm(count_check) 
+  
+sta_NA <- sta_ge27m07 %>% 
+  filter(is.na(lon)) %>% 
+  arrange() # check is :-] # down to 423 vals; fill with Cottonwood 
+rm(sta_NA) 
+
+#   3. filter NA vals from Long Valley & fill with Cottonwood 
+#     Before: 423 NA <- filling with Mission 
+#     After: zero NA values  
+sta_clean <- sta_ge27m07%>% 
+  filter(!is.na(lon)) # this is not active 
+
+sta_dirty <- sta_ge27m07%>% 
+  filter(is.na(lon)) %>% 
+  mutate(lon = cot) # Long Valley with Mission 
+
+sta_ge27m07<- bind_rows(sta_clean, sta_dirty) 
+  rm(sta_clean, sta_dirty) 
+
+  #Check on split :-)
+count_check <- bind_rows(sta_ge27m07, sta_lt27m07)  
+rm(count_check) 
+  
+sta_NA <- sta_ge27m07 %>% 
+  filter(is.na(lon)) %>% 
+  arrange() # check is :-] # down to zero vals 
+
+#   4. Put the pieces back together & cut to end of complete record 
+sta_trans7 <- bind_rows(sta_ge27m07, sta_lt27m07) 
+rm(sta_ge27m07, sta_lt27m07, sta_NA) 
+
+# Check work
+# A tibble: 1 x 4 - Raw
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               111229             456840
+
+# A tibble: 1 x 4 - Trans1
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               110496             456840
+
+# A tibble: 1 x 4 - Trans2
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               109638             456840
+
+# A tibble: 1 x 4 - Trans3
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               106210             456840
+
+# A tibble: 1 x 4 - Trans4
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               106204             456840
+
+# A tibble: 1 x 4 - Trans5
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               106108             456840
+
+# A tibble: 1 x 4 - Trans6
+#   rows columns total_missing_values total_observations
+#  <int>   <int>                <int>              <int>
+# 45684      10               104652             456840
+
+intro_trans7 <- as.tibble(introduce(sta_trans7)) %>%
+  select(-(3:5)) %>%
+  select(-5)
+intro_trans7
+   
+# A tibble: 1 x 4 - Trans7 - note the extra column
+   rows columns total_missing_values total_observations
+  <int>   <int>                <int>              <int>
+1 45684      11               117128             502524
+
+# export the work to a file
+export(sta_trans7, file = "data/stations_trans7.csv") 
+
+# This is to cut back to complete part of Oelrichs
+  sta_ge10      <- sta_trans7 %>% filter(year >= 1910) # yr above 
+  sta_09m06     <- sta_trans7 %>% filter(year == 1909 & month >= 6) 
+sta_fin     <- bind_rows( sta_ge10, sta_09m06) # this is active 
+  rm(sta_ge10, sta_09m06) 
 
 intro_sta_fin <- as.tibble(introduce(sta_fin)) %>%
   select(-(3:5)) %>%
   select(-5)
 intro_sta_fin
 
-# A tibble: 1 x 4
+# A tibble: 1 x 4 - Final
 #   rows columns total_missing_values total_observations
 #  <int>   <int>                <int>              <int>
-# 39812       9                66992             358308
+# 39812      11                76046             437932
+
 export(sta_fin, file = "data/stations_final.csv") 
 ```
 
+```{r eval-precip-data-lon, eval = FALSE}
+# General Purpose: fill NA prior to upscaling to monthly data
+# Specific purpose - Check Mission & Long Valley covariance
+
+# Variable naming convention - see munge-precip-data-oral code chunk  
+
+# NAs are caused in part by different start dates
+# ORAL        1971 - 2018  -fixed with Oelrichs & Harrison
+# MISSION     1951 - 2018  -fixed with Long Valley & Interior
+# INTERIOR    1949 - 2018  -fixed with Cottonwood & Murdo    
+# RAPID CITY  1948 - 2018  -fixed with Interior  
+# COTTONWOOD  1909 - 2018  -fixed with Interior & Murdo
+# OELRICHS    1893 - 2018  -fixed with Murdo
+# LONG VALLEY 1927 - 2012  -in.progress with Mission
+
+# load metadata & data
+sta_meta      <- as.tibble(import("data/sta_meta_fin2.csv"))
+sta_fin     <- as.tibble(import("data/stations_final.csv"))
+
+# Split data to the end of Mission - the purpose here is 
+#   to look at a double mass plot with Mission & Long Valley
+
+sta_test <- sta_fin %>%
+  filter(year > 1951) %>%
+  filter(year < 2012)
+
+# gather values & create groups
+sta_gath <- gather(sta_test, key = "station", value = "prcp", -date, 
+                   -year, -month, factor_key = TRUE)
+
+sta_group <- sta_gath %>%
+  group_by(year, month, station)
+
+# sum daily precip over a month
+sta_gath_mon <- sta_group %>%
+  summarize(prcp_tenths = sum(prcp)) %>%
+  mutate(prcp_mm = prcp_tenths/10) %>%
+  select(-prcp_tenths)
+
+# spread result - now in months 
+sta_mon <- sta_gath_mon %>%
+  spread(station, prcp_mm) %>%
+  mutate(day = 1) %>%
+  mutate(date = make_date(year = year, month = month, day = day)) %>%
+  select(date, year, month, everything()) %>%
+  select(-day) %>%
+  ungroup()
+rm(sta_gath, sta_group, sta_gath_mon)
+
+# filter Mission, Long Valley, Interior
+sta_gath2 <- gather(sta_mon, key = "station", value = "prcp", -date, 
+                   -year, -month, -lon, factor_key = TRUE) %>%
+  filter(station == "int" | 
+           station == "mis")
+
+# plot the graphs of Interior and Mission
+# see which precip is more similiar.
+
+ggplot(sta_gath2, aes(prcp, lon)) +
+  geom_point() +
+  geom_smooth(method = "lm", aes(color = "red")) +
+  facet_grid(.~station) +
+   scale_x_sqrt() +
+  scale_y_sqrt() +
+  geom_smooth()
+```
+
+```{r modeling-results}
+# continued from above
+lm <- lm(data = sta_mon, sqrt(lon) ~ sqrt(mis) + sqrt(int))
+lm.tidy <- tidy(lm)
+lm.glance <- glance(lm)
+
+lm_int <- lm(data = sta_mon, sqrt(lon) ~ sqrt(int))
+lm_int.tidy <- tidy(lm_int)
+lm_int.glance <- glance(lm_int)
+
+lm_mis <- lm(data = sta_mon, sqrt(lon) ~ sqrt(mis))
+lm_mis.tidy <- tidy(lm_mis)
+lm_mis.glance <- glance(lm_mis)
+# result: drop the long valley data and use Interior for southeast
+
+# remove not-needed stations
+sta_meta <- sta_meta %>%
+  filter(name == "LONG VALLEY, SD US")
+
+export(sta_meta, file = "data/sta_meta_fin3.csv") 
+
+sta_mon <- sta
+```
+
 ```{r daily2monthly-precip, eval = FALSE}
+# continued from above
 # General Purpose: prepare data for drought index
 # Specific purpose: convert daily precip to monthly precip 
 
 # load metadata & data
-sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
-sta_day       <- as.tibble(import("data/stations_final.csv"))
+sta_meta  <- as.tibble(import("data/sta_meta_fin3.csv"))
+sta_day   <- as.tibble(import("data/stations_final2.csv"))
+
+# remove Murdo, Mission, Long Valley - see above
+#sta_day   <- sta_day %>%
+#  select(-c(lon, mur, mis))
+#export(sta_day, file = "data/stations_final2.csv") 
 
 # fix date & add year and month
 sta_day <- sta_day %>%
@@ -1090,20 +1352,20 @@ export(sta_mon, file = "data/stations_monthly.csv")
 ```
 
 ```{r ggplot_monthly}
-# General Purpose: prepare data for drought index
-# Specific purpose: graphical EDA
+# General Purpose: prepare data for drought index 
+# Specific purpose: graphical EDA 
 
-sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
-sta_mon   <- as.tibble(import("data/stations_monthly.csv"))
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv")) 
+sta_mon   <- as.tibble(import("data/stations_monthly.csv")) 
 
-# fix date & add year and month
-sta_mon <- sta_mon %>%
-  mutate(date = ymd(date)) %>%
-  arrange(desc(date)) 
+# fix date & add year and month 
+sta_mon <- sta_mon %>% 
+  mutate(date = ymd(date)) %>% 
+  arrange(desc(date))  
 
-# gather monthly values
+# gather monthly values 
 sta_gath <- gather(sta_mon, key = "station", value = "prcp", -date, 
-                   -year, -month, factor_key = TRUE)
+                   -year, -month, factor_key = TRUE) 
 
 # plot
 ggplot(sta_gath, aes(date, prcp)) +
@@ -1114,6 +1376,7 @@ ggplot(sta_gath, aes(date, prcp)) +
        subtitle = "Pine Ridge Reservation, SD for 1909-2018") +
        xlab("Date") +
        ylab("Depth, mm")
+ # should check on similarity between oel and ora
 ```
 
 ```{r monthly2yearly-precip, eval = FALSE}
@@ -1124,11 +1387,12 @@ ggplot(sta_gath, aes(date, prcp)) +
 sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
 sta_mon   <- as.tibble(import("data/stations_monthly.csv"))
 
+
 # fix date & add year and month
 sta_mon <- sta_mon %>%
   mutate(date = ymd(date)) %>%
   arrange(desc(date)) %>%
-  select(date, year, month, everything())
+  select(date, year, month, everything()) 
 
 # gather monthly values
 sta_gath <- gather(sta_mon, key = "station", value = "prcp", -date, 
@@ -1153,7 +1417,7 @@ rm(sta_mon, sta_gath, sta_gath_yr, sta_group)
 export(sta_yr, file = "data/stations_yearly.csv") 
 ```
 
-```{r ggplot_yearly}
+```{r ggplot_yearly, eval = FALSE}
 # General Purpose: prepare data for drought index
 # Specific purpose: graphical EDA
 
@@ -1161,11 +1425,11 @@ sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
 sta_yr   <- as.tibble(import("data/stations_yearly.csv"))
 
 # fix date & add year and month
-sta_yr <- sta_mon %>%
+sta_yr <- sta_yr %>%
   mutate(date = ymd(date)) %>%
   arrange(desc(date)) 
 
-# gather yearly values
+# gather yearly values for plotting
 sta_gath <- gather(sta_yr, key = "station", value = "prcp", 
                    -year, factor_key = TRUE)
 
@@ -1179,3 +1443,38 @@ ggplot(sta_gath, aes(year, prcp)) +
        xlab("Year") +
        ylab("Depth, mm")
 ```
+
+```{r}
+# General Purpose: prepare data for drought index
+# Specific purpose: graphical EDA - correlation plot
+
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv"))
+sta_yr   <- as.tibble(import("data/stations_yearly.csv"))
+
+# fix date & add year and month
+sta_yr <- sta_yr %>%
+  arrange(year) 
+
+# need to have a correlation matrix without any NA vals
+# gather yearly values 
+sta_gath <- gather(sta_yr, key = "station", value = "prcp", 
+                   -year, factor_key = TRUE)
+
+# filter NAs
+sta_gath_52 <- sta_gath %>%
+  filter(year > 1951) %>%
+  filter(station != "ora")
+
+# spread remaining matrix & arrange from west to east
+sta_52 <- sta_gath_52 %>%
+  spread(station, prcp) %>%
+  select(rap, oel, int, cot, mis)
+
+# create a correlation matrix and plot it
+sta_M <- cor(sta_52)
+corrplot(sta_M, method = "number", type = "upper")
+
+# Results: Mission is a lot different from other stations 
+#   and should be removed.
+```
+

@@ -301,7 +301,7 @@ ggplot(data = sta_meta, aes(x = lon, y = lat)) +
 #                width = 6, height = 6, units = "in")
 ```
 
-```{r voroni-diagram-final}
+```{r voroni-diagram-inter}
 # import site location data and filter out:
 #   hermosa, ainsworth, harrison, hot springs
 sta_meta <- import("index/data/Archived/station_meta2.csv")
@@ -354,8 +354,68 @@ p_site +
     fill = rgb(70, 130, 180, 255, maxColorValue = 255),
     fill = rgb(70, 130, 180, 255, maxColorValue = 255)) 
   
-# One idea - kadoka is short but might be added to long valley, but
-# its easier to just use a single complete record from further away.
+
+#sta_meta <- as.tibble(sta_meta)
+# final list of stations
+# id                name                              
+#  <chr>             <chr>                             
+# 1 GHCND:USW00024090 RAPID CITY REGIONAL AIRPORT, SD US
+# 2 GHCND:USC00396212 OELRICHS, SD US                   
+# 3 GHCND:USC00394184 INTERIOR 3 NE, SD US              
+# 4 GHCND:USC00391972 COTTONWOOD 2 E, SD US             
+# 5 GHCND:USC00395638 MISSION 14 S, SD US               
+# 6 GHCND:USC00396304 ORAL, SD US   
+
+#ggplot2::ggsave(filename = "theissen_fin.png", 
+#                width = 6, height = 6, units = "in")
+# export(sta_meta, file = "index/data/sta_meta_fin.csv")
+```
+
+```{r voroni-diagram-final}
+# import site location data and filter out:
+#   hermosa, ainsworth, harrison, hot springs
+sta_meta <- import("index/data/sta_meta_fin3.csv")
+
+# import gage location data
+gage_meta <- import("index/data/gage_meta.csv")
+  
+# define the study area using data from the 'maps' package
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# import polygon data - counties
+counties <- map_data("county") 
+counties <- subset(counties, region %in% 
+   c("south dakota", "nebraska"))
+prr <- subset(counties, subregion %in% 
+   c("shannon", "jackson", "bennett"))
+
+# create voroni line segments
+voronoi <- deldir(sta_meta$lon, sta_meta$lat)
+
+#Plot the points, voronoi lines, and annotate
+p_site <- ggplot(data = sta_meta, aes(x = lon, y = lat)) +
+  geom_point(
+    fill = rgb(70, 130, 180, 255, maxColorValue = 255),
+    pch = 21,
+    size = 4,
+    color = "#333333") +   
+  geom_segment(
+    aes(x = x1, y = y1, xend = x2, yend = y2),
+    size = 2,
+    data = voronoi$dirsgs,
+    linetype = 1,
+    color = "#FFB958") +
+  geom_polygon(data = prr, aes(x = long, y = lat, group = group), 
+              color = "black", linetype = "dashed", fill = "NA") +
+  theme_bw() +
+  geom_text(data = sta_meta, aes(label = name), size = 2.5) +
+  ggtitle("Final Theissen Polygon Map")
+  
+p_site +
+  geom_point(data = gage_meta, aes(x = dec_long_va, 
+                                   y = dec_lat_va),
+    fill = rgb(70, 130, 180, 255, maxColorValue = 255),
+    fill = rgb(70, 130, 180, 255, maxColorValue = 255)) 
+  
 
 #sta_meta <- as.tibble(sta_meta)
 # final list of stations
