@@ -1,0 +1,2 @@
+id,name,lat,lon,elevation,mindate,maxdate,datacoverage,elevationUnit
+GHCND:USC00395638,"MISSION 14 S, SD US",43.1113,-100.6083,856.5,1951-08-01,2018-05-31,1,METERS
