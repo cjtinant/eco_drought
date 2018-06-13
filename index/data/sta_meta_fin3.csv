@@ -1,0 +1,2 @@
+id,name,lat,lon,elevation,mindate,maxdate,datacoverage,elevationUnit
+GHCND:USC00394983,"LONG VALLEY, SD US",43.46,-101.4955,752.9,1927-07-01,2012-11-03,1,METERS
