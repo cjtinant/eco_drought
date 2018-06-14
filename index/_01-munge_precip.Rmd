@@ -890,7 +890,7 @@ export(sta_trans5, file = "data/stations_trans5.csv")
 ```
 
 ```{r munge-precip-data-oel, eval = FALSE}
-# General Purpose: fill NA prior to upscaling to monthly data  
+# General Purpose: fill NA prior to upscaling to monthly data 
 # Specific purpose - clean Oelrichs with Murdo &  
 #   define oldest date with continuous data 
 
@@ -1027,7 +1027,7 @@ export(sta_trans6, file = "data/stations_trans6.csv")
 ```
 
 ```{r munge-precip-data-lon, eval = FALSE}
-# General Purpose: fill NA prior to upscaling to monthly data  
+# General Purpose: fill NA prior to upscaling to monthly data 
 # Specific purpose - Append Long Valley with Mission  
 
 # Variable naming convention - see munge-precip-data-oral code chunk  
@@ -1210,10 +1210,10 @@ intro_sta_fin
 export(sta_fin, file = "data/stations_final.csv") 
 ```
 
-```{r eval-lon-cont, eval = FALSE}
+```{r eval-precip-data-lon, eval = FALSE}
 # General Purpose: fill NA prior to upscaling to monthly data
-# Specific purpose - Check Hot Springs - Annual precip below for OEL
-# reflects Black Hills rather than rainshadow
+# Specific purpose - Check Mission & Long Valley covariance
+
 # Variable naming convention - see munge-precip-data-oral code chunk  
 
 # NAs are caused in part by different start dates
@@ -1227,11 +1227,7 @@ export(sta_fin, file = "data/stations_final.csv")
 
 # load metadata & data
 sta_meta      <- as.tibble(import("data/sta_meta_fin2.csv"))
-sta_meta_orig <- as.tibble(import("data/Archived/station_meta2.csv")) 
-sta_fin       <- as.tibble(import("data/stations_final.csv"))
-
-
-
+sta_fin     <- as.tibble(import("data/stations_final.csv"))
 
 # Split data to the end of Mission - the purpose here is 
 #   to look at a double mass plot with Mission & Long Valley
@@ -1403,9 +1399,11 @@ sta_mon <- sta_mon %>%
   mutate(date = ymd(date)) %>% 
   arrange(desc(date))  
 
-# gather monthly values 
-sta_gath <- gather(sta_mon, key = "station", value = "prcp", -date, 
-                   -year, -month, factor_key = TRUE) 
+# gather monthly values & order them
+sta_gath_mon <- gather(sta_mon, key = "station", value = "prcp", 
+                       -date, -year, -month, factor_key = TRUE) 
+
+x$name <- factor(x$name, levels = x$name[order(x$val)])
 
 # plot
 ggplot(sta_gath, aes(date, prcp)) +
@@ -1487,8 +1485,7 @@ ggplot2::ggsave(filename = "precip_yr.png",
 
 ```{r monthly_yearly_summaries, eval = FALSE}
 # General Purpose: prepare data for drought index 
-# Specific purpose: graphical EDA 
-
+# Specific purpose: create summaries of data
 sta_meta  <- as.tibble(import("data/sta_meta_fin.csv")) 
 sta_yr   <- as.tibble(import("data/stations_yearly.csv"))
 sta_mon   <- as.tibble(import("data/stations_monthly.csv"))
@@ -1512,6 +1509,7 @@ sta_summary_yr <- sta_gath_yr %>%
             min = min(prcp, na.rm = TRUE), 
             max = max(prcp, na.rm = TRUE)) %>%
   arrange(desc(med))
+export(sta_summary_yr, file = "data/sta_summary_yr.csv") 
 
 # gather and summarize monthly values 
 sta_gath_mon <- gather(sta_mon, key = "station", value = "prcp", 
@@ -1526,20 +1524,24 @@ sta_summary_mon <- sta_gath_mon %>%
             max = max(prcp, na.rm = TRUE)) %>%
   arrange(month) %>%
   arrange(station)
+
+export(sta_summary_mon, file = "data/sta_summary_mon.csv") 
 ```
 
 ```{r ggplot_monthly_boxplots ,eval= FALSE}
 # General Purpose: prepare data for drought index 
-# Specific purpose: graphical EDA - yearly
+# Specific purpose: graphical EDA 
+sta_meta  <- as.tibble(import("data/sta_meta_fin.csv")) 
+sta_mon   <- as.tibble(import("data/stations_monthly.csv"))
+export(sta_summary_yr, file = "data/sta_summary_mon.csv") 
 
-# from above
 
 # boxplot
 ggplot(sta_gath_mon, aes(month, prcp, group = month)) +
   geom_boxplot() +
   facet_wrap(~station) +
   theme_classic() + 
-  labs(title = "Annual precipitation",
+  labs(title = "Monthly precipitation",
        subtitle = "Pine Ridge Reservation, SD for 1910-2017") +
        xlab("Date") +
        ylab("Depth, mm")
@@ -1547,6 +1549,8 @@ ggplot(sta_gath_mon, aes(month, prcp, group = month)) +
 ggplot2::ggsave(filename = "precip_yr.png", 
                 width = 6, height = 6, units = "in")
 ```
+
+
 
 
 
