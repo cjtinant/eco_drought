@@ -41,5 +41,7 @@ I imported Global Historical Climatology Network (GHCN) daily precipitation reco
 I used Theissen polygons and the length and continuity of precipitation records to select stations for further analysis.
 I used 'dplyr' to fill NA values with data from nearest station
 I used 'dplyr' to create monthly vals from daily vals.
+I removed short records: Oral & Long Valley after checking for 
+covariance.
 
 
